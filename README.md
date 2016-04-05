@@ -1,2 +1,3 @@
 # SatTrack
-Python Based Satellite tracking POC
+This is a Python Based Satellite tracking Proof of Concept.
+
