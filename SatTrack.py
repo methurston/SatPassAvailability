@@ -4,7 +4,7 @@ import sqlite3
 import ephem
 import math
 from datetime import datetime
-
+import sys
 
 # globals
 degrees_per_radian = 180.0 / math.pi
@@ -30,12 +30,14 @@ def fetch_sat_tle(sat_name):
 
 
 def fetch_location(name):
-    query = 'SELECT name, lat, lon, elevation FROM locations where name = \'{}\';'.format(name)
+    query = 'SELECT callsign, lat, lon, elevation FROM locations where callsign = \'{}\';'.format(name)
     cursor = conn.cursor()
     c = cursor.execute(query)
     all_sats = c.fetchall()
     if len(all_sats) == 0:
         print('Location Not Found')
+        conn.close()
+        sys.exit()
     elif len(all_sats) > 1:
         print('Multiple locations found, check username')
     else:
@@ -47,7 +49,7 @@ def fetch_location(name):
 
 
 sat = fetch_sat_tle('SO-50')
-loc = fetch_location('matt')
+loc = fetch_location('W1AW')
 sat.compute(loc)
 loc.date = datetime.utcnow()
 print('{}: altitude {} deg, azimuth {} deg'.format(sat.name, sat.alt * degrees_per_radian, sat.az * degrees_per_radian))
