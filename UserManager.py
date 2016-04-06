@@ -1,13 +1,29 @@
 #!/usr/bin/env python
 from __future__ import print_function
 from geocoder import google
+import requests
+import json
+import sqlite3
+
+# Globals
+callsign_url = 'https://callook.info'
+db_name = 'sats.db'
+
+
+def lookup_callsign(callsign):
+    finalurl = '{}/{}/json'.format(callsign_url, callsign)
+    callook_info = requests.get(finalurl)
+    return callook_info.content
+
 
 def get_latlon(street_address):
-    """ Get the latitude and longitude of an address """
+    """ Get the latitude and longitude of an address from google.
+        Not used, but I'm keeping it around for non us call signs"""
     address_details = google(street_address)
     print(address_details)
     latlong = {'lat': address_details.lat, 'lon': address_details.lng}
     return latlong
+
 
 def get_elevation(latlon):
     """Use google to get the elevation of a lat/long pair"""
@@ -15,7 +31,29 @@ def get_elevation(latlon):
     return elevation.meters
 
 
-myaddress = ''
-myloc = get_latlon(myaddress)
-myloc['elevation'] = get_elevation(myloc)
-print(myloc)
+class User(object):
+    def __init__(self, callsign, lat, lon):
+        self.callsign = callsign
+        self.lat = lat
+        self.lon = lon
+        self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
+
+    def store_user(self):
+        query = 'INSERT OR REPLACE INTO locations (callsign, lat, lon, elevation) ' \
+                'VALUES (\'{}\', \'{}\', \'{}\', \'{}\')'.format(self.callsign,
+                                                 self.lat,
+                                                 self.lon,
+                                                 self.elevation)
+        # print(query)
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
+
+
+test_callsign = 'W1AW'
+fullLoc = json.loads(lookup_callsign(test_callsign))
+myUser = User(test_callsign, fullLoc['location']['latitude'],fullLoc['location']['longitude'])
+myUser.store_user()
+print(myUser)
