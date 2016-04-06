@@ -8,7 +8,7 @@ updateDTS text
 
 CREATE TABLE locations
 (
-name text PRIMARY KEY,
+callsign text PRIMARY KEY,
 lat REAL,
 lon REAL,
 elevation INT
