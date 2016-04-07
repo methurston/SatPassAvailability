@@ -13,3 +13,14 @@ lat REAL,
 lon REAL,
 elevation INT
 );
+
+ALTER TABLE locations
+ADD COLUMN satellites text;
+
+CREATE TABLE timeslots
+(
+FOREIGN KEY callsign REFERENCES locations(callsign),
+days text,
+timeslot,
+timezone
+);
