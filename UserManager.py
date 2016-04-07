@@ -27,7 +27,7 @@ def get_latlon(street_address):
 
 def get_elevation(latlon):
     """Use google to get the elevation of a lat/long pair"""
-    elevation = google([latlon['lat'],latlon['lon']], method='elevation')
+    elevation = google([latlon['lat'], latlon['lon']], method='elevation')
     return elevation.meters
 
 
@@ -41,10 +41,9 @@ class User(object):
     def store_user(self):
         query = 'INSERT OR REPLACE INTO locations (callsign, lat, lon, elevation) ' \
                 'VALUES (\'{}\', \'{}\', \'{}\', \'{}\')'.format(self.callsign,
-                                                 self.lat,
-                                                 self.lon,
-                                                 self.elevation)
-        # print(query)
+                                                                 self.lat,
+                                                                 self.lon,
+                                                                 self.elevation)
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
         cursor.execute(query)
@@ -52,8 +51,9 @@ class User(object):
         conn.close()
 
 
-test_callsign = 'W1AW'
-fullLoc = json.loads(lookup_callsign(test_callsign))
-myUser = User(test_callsign, fullLoc['location']['latitude'],fullLoc['location']['longitude'])
-myUser.store_user()
-print(myUser)
+if __name__ == '__main__':
+    test_callsign = 'W1AW'
+    fullLoc = json.loads(lookup_callsign(test_callsign))
+    myUser = User(test_callsign, fullLoc['location']['latitude'], fullLoc['location']['longitude'])
+    myUser.store_user()
+    print(myUser.callsign)
