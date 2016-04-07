@@ -17,8 +17,6 @@ satellite_types = {'ham': 'amateur',
                    'weather': 'weather',
                    'wx': 'weather',
                    'noaa': 'noaa'}
-db_name = 'sats.db'
-conn = sqlite3.connect(db_name)
 
 
 class Tle(object):
@@ -69,7 +67,7 @@ def get_tle_file_age():
     else:
         string_tle_age = result[0][0]
         time_tle_age = dateutil.parser.parse(string_tle_age)
-        tle_age = (datetime.now() - time_tle_age).seconds/3600  # Right now this uses 3 hours. Could change to days.
+        tle_age = (datetime.now() - time_tle_age).seconds/1200  # Right now this uses 3 hours. Could change to days.
     return tle_age
 
 
@@ -110,7 +108,9 @@ def parse_tle_file(tle_file):
     return tle_objects
 
 
-def main():
+if __name__ == '__main__':
+    db_name = 'sats.db'
+    conn = sqlite3.connect(db_name)
     file_age = get_tle_file_age()
     print('Age of newest record: {}'.format(file_age))
     if file_age >= file_age_threshold:
@@ -122,5 +122,3 @@ def main():
     else:
         print('Satellite records are up to date.')
     conn.close()
-
-main()
