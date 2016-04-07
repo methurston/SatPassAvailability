@@ -11,11 +11,6 @@ degrees_per_radian = 180.0 / math.pi
 db_name = 'sats.db'
 conn = sqlite3.connect(db_name)
 
-home = ephem.Observer()
-home.lat = 43.612262
-home.lon = -116.240718
-home.elevation = 832
-
 
 def fetch_sat_tle(sat_name):
     query = 'SELECT name, lineone, linetwo FROM satellites where name like \'%{}%\';'.format(sat_name)
@@ -33,23 +28,29 @@ def fetch_location(name):
     query = 'SELECT callsign, lat, lon, elevation FROM locations where callsign = \'{}\';'.format(name)
     cursor = conn.cursor()
     c = cursor.execute(query)
-    all_sats = c.fetchall()
-    if len(all_sats) == 0:
+    all_locs = c.fetchall()
+    if len(all_locs) == 0:
         print('Location Not Found')
         conn.close()
         sys.exit()
-    elif len(all_sats) > 1:
+    elif len(all_locs) > 1:
         print('Multiple locations found, check username')
     else:
+        print(all_locs)
         location = ephem.Observer()
-        location.lat = all_sats[0][1]
-        location.lon = all_sats[0][2]
-        location.elevation = all_sats[0][3]
+        location.lat = all_locs[0][1] * ephem.degree
+        location.lon = all_locs[0][2] * ephem.degree
+        location.elevation = all_locs[0][3]
+        print(location.elevation)
     return location
 
 
-sat = fetch_sat_tle('SO-50')
-loc = fetch_location('W1AW')
-sat.compute(loc)
-loc.date = datetime.utcnow()
-print('{}: altitude {} deg, azimuth {} deg'.format(sat.name, sat.alt * degrees_per_radian, sat.az * degrees_per_radian))
+if __name__ == '__main__':
+    """sample code to show how functions work
+       Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
+    sat = fetch_sat_tle('SO-50')
+    loc = fetch_location('N7DFL')
+    sat.compute(loc)
+    loc.date = '2016-04-07 22:00:00'
+    satpass = loc.next_pass(sat)
+    print('Rise Time: {}, Azimuth:{}'.format(satpass[0], satpass[1]))
