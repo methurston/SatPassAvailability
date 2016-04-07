@@ -51,6 +51,6 @@ if __name__ == '__main__':
     sat = fetch_sat_tle('SO-50')
     loc = fetch_location('N7DFL')
     sat.compute(loc)
-    loc.date = '2016-04-07 22:00:00'
+    loc.date = datetime.utcnow()
     satpass = loc.next_pass(sat)
     print('Rise Time: {}, Azimuth:{}'.format(satpass[0], satpass[1]))
