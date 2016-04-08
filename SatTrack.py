@@ -49,7 +49,7 @@ if __name__ == '__main__':
     """sample code to show how functions work
        Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
     sat = fetch_sat_tle('SO-50')
-    loc = fetch_location('N7DFL')
+    loc = fetch_location('W1AW')
     sat.compute(loc)
     loc.date = datetime.utcnow()
     satpass = loc.next_pass(sat)

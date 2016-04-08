@@ -69,7 +69,7 @@ class TimeSlot(object):
 
 
 if __name__ == '__main__':
-    example = TimeSlot('N7DFL',
+    example = TimeSlot('W1AW',
                        'M,T,W,Th,F',
                        '12:00',
                        '3600')
