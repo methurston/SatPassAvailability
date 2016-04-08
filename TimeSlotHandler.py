@@ -56,11 +56,18 @@ class TimeSlot(object):
         conn.close()
 
 
-    def calc_end_time(self):
-        """Take the start time + duration to calculate end time"""
-        pass
+    def gen_iso_datetimestamp(self):
+        """combine all the data from locations and timeslots to create an iso timestamp for the start time"""
+        query = 'SELECT callsign, timezone FROM locations where callsign = \'{}\';'.format(self.callsign)
+        conn = sqlite3.connect(db_name)
+        c = conn.cursor()
+        result = c.execute(query)
+        resultdata = result.fetchone()
+        self.timezone = resultdata[1]
+        conn.close()
+        print('Timezone: {}'.format(self.timezone))
 
-    def gen_start_times(self):
+    def gen_start_days(self):
         """take the starting time, combine with days, return an array of date time stamps"""
         int_days = []
         for day in self.days.split(','):
@@ -74,4 +81,5 @@ if __name__ == '__main__':
                        '12:00',
                        '3600')
     example.store_timeslot()
-    example.gen_start_times()
+    example.gen_start_days()
+    example.gen_iso_datetimestamp()
