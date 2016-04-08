@@ -3,6 +3,8 @@ CREATE TABLE satellites
 name text PRIMARY KEY,
 lineone text,
 linetwo text,
+timezone text,
+satellites text,
 updateDTS text
 );
 
@@ -11,16 +13,16 @@ CREATE TABLE locations
 callsign text PRIMARY KEY,
 lat REAL,
 lon REAL,
-elevation INT
+elevation INT,
+timezone text
 );
 
-ALTER TABLE locations
-ADD COLUMN satellites text;
 
 CREATE TABLE timeslots
 (
-FOREIGN KEY callsign REFERENCES locations(callsign),
-days text,
-timeslot,
-timezone
+callsign text,
+weekdays text,
+start_time text,
+duration INT,
+FOREIGN KEY(callsign) REFERENCES locations(callsign)
 );

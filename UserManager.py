@@ -32,18 +32,20 @@ def get_elevation(latlon):
 
 
 class User(object):
-    def __init__(self, callsign, lat, lon):
+    def __init__(self, callsign, lat, lon, timezone):
         self.callsign = callsign
         self.lat = lat
         self.lon = lon
         self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
+        self.timezone = timezone
 
     def store_user(self):
-        query = 'INSERT OR REPLACE INTO locations (callsign, lat, lon, elevation) ' \
-                'VALUES (\'{}\', \'{}\', \'{}\', \'{}\')'.format(self.callsign,
+        query = 'INSERT OR REPLACE INTO locations (callsign, lat, lon, elevation, timezone) ' \
+                'VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\')'.format(self.callsign,
                                                                  self.lat,
                                                                  self.lon,
-                                                                 self.elevation)
+                                                                 self.elevation,
+                                                                 self.timezone)
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
         cursor.execute(query)
@@ -54,6 +56,6 @@ class User(object):
 if __name__ == '__main__':
     test_callsign = 'W1AW'
     fullLoc = json.loads(lookup_callsign(test_callsign))
-    myUser = User(test_callsign, fullLoc['location']['latitude'], fullLoc['location']['longitude'])
+    myUser = User(test_callsign, fullLoc['location']['latitude'], fullLoc['location']['longitude'], 'US/Eastern')
     myUser.store_user()
     print(myUser.callsign)

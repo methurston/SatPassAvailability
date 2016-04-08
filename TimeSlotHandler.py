@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from datetime import datetime
-import dateutil
-import pytz
+import arrow
+import sqlite3
 
 # TODO: Move timezone to UserManager.py
 
@@ -33,24 +32,29 @@ daymap = {'m': 1,
           'su': 7,
           'sun': 7,
           'sunday': 7}
+db_name = 'sats.db'
 
 
 class TimeSlot(object):
-    def __init__(self, callsign, days, start_time, duration, timezone):
+    def __init__(self, callsign, days, start_time, duration):
         self.callsign = callsign
         self.days = days
         self.start_time = start_time
         self.duration = duration
-        self.timezone = timezone
 
     def store_timeslot(self):
-        query = 'INSERT INTO timeslot (callsign, days, startime, duration, timezone) ' \
-                'VALUES (\'{}\', \'{}\', \'{}\', {}, \'{}\')'.format(self.callsign,
+        query = 'INSERT INTO timeslots (callsign, weekdays, start_time, duration) ' \
+                'VALUES (\'{}\', \'{}\', \'{}\', {})'.format(self.callsign,
                                                                      self.days,
                                                                      self.start_time,
-                                                                     self.duration,
-                                                                     self.timezone.zone)
+                                                                     self.duration)
         print(query)
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
+
 
     def calc_end_time(self):
         """Take the start time + duration to calculate end time"""
@@ -65,10 +69,9 @@ class TimeSlot(object):
 
 
 if __name__ == '__main__':
-    example = TimeSlot('W1AW',
-                       'M,Tu,Th,Sa',
-                       '18:00',
-                       '1.5',
-                       pytz.timezone('US/Eastern'))
+    example = TimeSlot('N7DFL',
+                       'M,T,W,Th,F',
+                       '12:00',
+                       '3600')
     example.store_timeslot()
     example.gen_start_times()
