@@ -1,0 +1,34 @@
+{
+  "name": "sample configuration file",
+  "age_thresholds": {
+    "tle_file": 3,
+    "qth_data": 30
+  },
+  "datasource": {
+    "type": "sqlite3",
+    "filename": "../sats.db",
+    "username": null,
+    "password": null
+    },
+  "satsource": {
+    "amsat": {
+      "host": "www.amsat.org",
+      "path": "/amsat/ftp/keps/current/",
+      "filename": "nasabare.txt"
+    },
+    "celestrak": {
+      "host": "www.celestrak.com",
+      "path": null,
+      "filenames": {
+        "ham": "amateur.txt",
+        "amateur": "amateur.txt",
+        "weather": "weather.txt",
+        "wx": "weather.txt",
+        "noaa": "noaa.txt"}
+    }
+  },
+  "usersource": {
+    "host": "https://callook.info",
+    "username": null
+  }
+}

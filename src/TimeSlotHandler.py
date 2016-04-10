@@ -3,7 +3,7 @@ from __future__ import print_function
 import arrow
 import sqlite3
 
-# TODO: Move timezone to UserManager.py
+
 
 
 # globals

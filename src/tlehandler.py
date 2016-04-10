@@ -5,18 +5,21 @@ from datetime import datetime
 import sqlite3
 import dateutil.parser
 import sys
+import json
 
 # Globals
-hosts = {'celestrak': 'www.celestrak.com',
-         'amsat': 'www.amsat.org'}
+try:
+    with open('../config/config.json') as configuration_file:
+        config = json.load(configuration_file)
+except IOError:
+    print('Config File not found')
+    sys.exit()
+except ValueError as e:
+    print('Invalid JSON: Error was: {}'.format(e))
+    sys.exit()
 
-
-file_age_threshold = 3
-satellite_types = {'ham': 'amateur',
-                   'amateur': 'amateur',
-                   'weather': 'weather',
-                   'wx': 'weather',
-                   'noaa': 'noaa'}
+db_name = config['datasource']['filename']
+file_age_threshold = config['age_thresholds']['tle_file']
 
 
 class Tle(object):
@@ -73,11 +76,13 @@ def get_tle_file_age():
 
 def fetch_tle_file(host, satellite_type):
     if host == 'celestrak':
-        filename = '{}.txt'.format(satellite_types[satellite_type])
-        finalurl = 'http://{}/NORAD/elements/{}'.format(hosts[host], filename)
+        tle_config = config['satsource']['celestrak']
+        finalurl = 'http://{}/NORAD/elements/{}'.format(tle_config['host'], tle_config['filenames'][satellite_type])
     elif host == 'amsat':
-        filename = 'nasabare.txt'
-        finalurl = 'http://{}/amsat/ftp/keps/current/{}'.format(hosts[host], filename)
+        tle_config = config['satsource']['amsat']
+        print(tle_config)
+        finalurl = 'http://{}/{}/{}'.format(tle_config['host'], tle_config['path'], tle_config['filename'])
+        print(finalurl)
     else:
         print('Unknown host. String provided was: {}'.format(host))
         sys.exit()
@@ -109,13 +114,12 @@ def parse_tle_file(tle_file):
 
 
 if __name__ == '__main__':
-    db_name = 'sats.db'
     conn = sqlite3.connect(db_name)
     file_age = get_tle_file_age()
     print('Age of newest record: {}'.format(file_age))
     if file_age >= file_age_threshold:
         print('Satellite records are out of date, updating')
-        raw_tle = fetch_tle_file('amsat', 'ham')
+        raw_tle = fetch_tle_file('celestrak', 'ham')
         parsed_tle = parse_tle_file(raw_tle)
         for tle in parsed_tle:
             tle.update_or_store()

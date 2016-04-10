@@ -6,8 +6,18 @@ import json
 import sqlite3
 
 # Globals
-callsign_url = 'https://callook.info'
-db_name = 'sats.db'
+try:
+    with open('../config/config.json') as configuration_file:
+        config = json.load(configuration_file)
+except IOError:
+    print('Config File not found')
+    sys.exit()
+except ValueError as e:
+    print('Invalid JSON: Error was: {}'.format(e))
+    sys.exit()
+
+callsign_url = config['usersource']['host']
+db_name = config['datasource']['filename']
 
 
 def lookup_callsign(callsign):
