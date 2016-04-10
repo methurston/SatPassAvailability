@@ -24,11 +24,12 @@ db_name = config['datasource']['filename']
 
 
 def fetch_sat_tle(sat_name):
-    query = 'SELECT name, lineone, linetwo FROM satellites where name like \'%{}%\';'.format(sat_name)
+    query = 'SELECT name, lineone, linetwo FROM satellites where name like ?;'
+    params = (sat_name,)
     # print(query)
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
-    c = cursor.execute(query)
+    c = cursor.execute(query, params)
     first_match = c.fetchone()
     satellite = ephem.readtle(str(first_match[0]),
                               str(first_match[1]),
@@ -38,10 +39,11 @@ def fetch_sat_tle(sat_name):
 
 
 def fetch_location(name):
-    query = 'SELECT callsign, lat, lon, elevation FROM locations where callsign = \'{}\';'.format(name)
+    query = 'SELECT callsign, lat, lon, elevation FROM locations where callsign = ?;'
+    params = (name,)
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
-    c = cursor.execute(query)
+    c = cursor.execute(query, params)
     all_locs = c.fetchall()
     if len(all_locs) == 0:
         print('Location Not Found')

@@ -51,14 +51,15 @@ class User(object):
 
     def store_user(self):
         query = 'INSERT OR REPLACE INTO locations (callsign, lat, lon, elevation, timezone) ' \
-                'VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\')'.format(self.callsign,
-                                                                 self.lat,
-                                                                 self.lon,
-                                                                 self.elevation,
-                                                                 self.timezone)
+                'VALUES (?, ?, ?, ?, ?)'
+        params = (self.callsign,
+                  self.lat,
+                  self.lon,
+                  self.elevation,
+                  self.timezone)
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
-        cursor.execute(query)
+        cursor.execute(query, params)
         conn.commit()
         conn.close()
 

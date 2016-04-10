@@ -2,11 +2,22 @@
 from __future__ import print_function
 import arrow
 import sqlite3
-
-
-
+import json
 
 # globals
+try:
+    with open('../config/config.json') as configuration_file:
+        config = json.load(configuration_file)
+except IOError:
+    print('Config File not found')
+    sys.exit()
+except ValueError as e:
+    print('Invalid JSON: Error was: {}'.format(e))
+    sys.exit()
+
+db_name = config['datasource']['filename']
+
+
 # daymap maps common day names and abbreviations to isoweekday() values i.e Monday = 1, Tuesday = 2 ...
 daymap = {'m': 1,
           'mon': 1,
@@ -32,7 +43,6 @@ daymap = {'m': 1,
           'su': 7,
           'sun': 7,
           'sunday': 7}
-db_name = 'sats.db'
 
 
 class TimeSlot(object):
@@ -43,21 +53,61 @@ class TimeSlot(object):
         self.duration = duration
 
     def store_timeslot(self):
+        """Writes the timeslot record to the database.
+           Called by check existing, probably better not to call this directly"""
         query = 'INSERT INTO timeslots (callsign, weekdays, start_time, duration) ' \
-                'VALUES (\'{}\', \'{}\', \'{}\', {})'.format(self.callsign,
-                                                                     self.days,
-                                                                     self.start_time,
-                                                                     self.duration)
-        print(query)
+                'VALUES (?, ?, ?, ?)'
+        params = (self.callsign,
+                  self.days,
+                  self.start_time,
+                  self.duration)
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
-        cursor.execute(query)
+        cursor.execute(query, params)
         conn.commit()
+        conn.close()
+
+    def fetch_timeslots(self):
+        """fetches existing timeslots"""
+        query = 'SELECT callsign, weekdays, start_time, duration ' \
+                'FROM timeslots WHERE callsign = ?'
+        param = (self.callsign,)
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        results = cursor.execute(query, param)
+        existing = results.fetchall()
+        for row in existing:
+            print(row)
+        return existing
+        conn.close()
+
+    def check_exists(self):
+        """Queries to see if row exists"""
+        query = 'SELECT callsign, weekdays, start_time, duration ' \
+                'FROM timeslots ' \
+                'WHERE callsign = ? ' \
+                'AND weekdays = ? ' \
+                'AND start_time = ? ' \
+                'AND duration = ?'
+        params = (self.callsign,
+                  self.days,
+                  self.start_time,
+                  self.duration)
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        results = cursor.execute(query, params)
+        existing = results.fetchall()
+        if len(existing) == 0:
+            self.store_timeslot()
+            print('Record Stored')
+        else:
+            print('Record Already Exists')
         conn.close()
 
 
     def calc_end_time(self):
-        """Take the start time + duration to calculate end time"""
+        """Take the start time + duration to calculate end time
+           Not sure if this will be used"""
         pass
 
     def gen_start_times(self):
@@ -73,5 +123,6 @@ if __name__ == '__main__':
                        'M,T,W,Th,F',
                        '12:00',
                        '3600')
-    example.store_timeslot()
+    example.fetch_timeslots()
+    example.check_exists()
     example.gen_start_times()

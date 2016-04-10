@@ -34,20 +34,22 @@ class Tle(object):
     def store(self):
         """write values to DB"""
         query = 'INSERT OR REPLACE INTO satellites (name, lineone, linetwo, updateDTS)' \
-                'VALUES(\'{}\', \'{}\', \'{}\', \'{}\');'.format(self.name,
-                                                                 self.lineone,
-                                                                 self.linetwo,
-                                                                 self.age.isoformat())
+                'VALUES(?, ?, ?, ?);'
+        params = (self.name,
+                  self.lineone,
+                  self.linetwo,
+                  self.age.isoformat())
         cursor = conn.cursor()
-        cursor.execute(query)
+        cursor.execute(query, params)
         conn.commit()
 
     def update_or_store(self):
         """Check the age of the existing record, if it's over 2 days, pull
            New values"""
-        age_query = 'SELECT updateDTS FROM satellites where name = \'{}\''.format(self.name)
+        age_query = 'SELECT updateDTS FROM satellites where name = ?'
+        params = (self.name,)
         cursor = conn.cursor()
-        c = cursor.execute(age_query)
+        c = cursor.execute(age_query, params)
         all_match = c.fetchall()
 
         if len(all_match) == 0:
