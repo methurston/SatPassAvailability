@@ -2,6 +2,7 @@
 Under documented and tested idea where a user can find out if an amateur radio satellite pass is going to occur when the user (location) is available.
 
 There are 3 main data objects.
+
 1. Satellite Info (tlehandler.py)- This is stored in two line element format.  The information is retrieved from amsat or celestrak.
 
 2. Location (UserManager.py) - This is geo information about a user using a unique identifier (usually callsign).  Lat/Lon information comes from callook.info, elevation is pulled from google's geocode API.
