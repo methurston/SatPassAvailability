@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import arrow
+from datetime import datetime, timedelta
+from dateutil import tz
 import sqlite3
 import json
 
@@ -43,9 +45,25 @@ daymap = {'m': 1,
           'su': 7,
           'sun': 7,
           'sunday': 7}
+iso_day_name = {1: 'Monday',
+                2: 'Tuesday',
+                3: 'Wednesday',
+                4: 'Thursday',
+                5: 'Friday',
+                6: 'Saturday',
+                7: 'Sunday'}
+
+# def get_user_timezone(call):
+#     query = 'SELECT timezone from locations WHERE callsign = ?'
+#     params = (call, )
+#     conn = sqlite3.connect(db_name)
+#     cursor = conn.cursor()
+#     result = cursor.execute(query, params)
+#     user_timezone =
 
 
 class TimeSlot(object):
+    """ This class generates and stores time slots for a specific location"""
     def __init__(self, callsign, days, start_time, duration):
         self.callsign = callsign
         self.days = days
@@ -54,7 +72,7 @@ class TimeSlot(object):
 
     def store_timeslot(self):
         """Writes the timeslot record to the database.
-           Called by check existing, probably better not to call this directly"""
+           Called by check existing, If this function is called directly, the row will be duplicated."""
         query = 'INSERT INTO timeslots (callsign, weekdays, start_time, duration) ' \
                 'VALUES (?, ?, ?, ?)'
         params = (self.callsign,
@@ -67,22 +85,8 @@ class TimeSlot(object):
         conn.commit()
         conn.close()
 
-    def fetch_timeslots(self):
-        """fetches existing timeslots"""
-        query = 'SELECT callsign, weekdays, start_time, duration ' \
-                'FROM timeslots WHERE callsign = ?'
-        param = (self.callsign,)
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
-        results = cursor.execute(query, param)
-        existing = results.fetchall()
-        for row in existing:
-            print(row)
-        return existing
-        conn.close()
-
     def check_exists(self):
-        """Queries to see if row exists"""
+        """Queries to see if row exists, if not write it to DB."""
         query = 'SELECT callsign, weekdays, start_time, duration ' \
                 'FROM timeslots ' \
                 'WHERE callsign = ? ' \
@@ -104,25 +108,58 @@ class TimeSlot(object):
             print('Record Already Exists')
         conn.close()
 
+class LocationTimeSlots(object):
+    """Time slots associated with a specific location."""
+    def __init__(self, callsign):
+        self.callsign = callsign
+
+    def fetch_timeslots(self):
+        """fetches existing timeslots"""
+        query = 'SELECT ts.callsign, ts.weekdays, ts.start_time, ts.duration, l.timezone ' \
+                'FROM timeslots ts JOIN locations l ' \
+                'ON ts.callsign = l.callsign ' \
+                'WHERE l.callsign = ?'
+        print(query)
+        param = (self.callsign,)
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        results = cursor.execute(query, param)
+        existing = results.fetchall()
+        for row in existing:
+            print(row)
+        self.all_timeslots = existing
+        conn.close()
+
+    def gen_start_times(self):
+        """take the starting time, combine with days, return an array of date time stamps"""
+        final_start_dates = set() # This allows us to toss out duplicates.
+        today_int = arrow.now().isoweekday()
+        today_date = arrow.now().date()
+        print('Today is: {} - Int: {}'.format(today_date, today_int))
+        for row in self.all_timeslots:
+            for day in row[1].split(','):
+                int_day = daymap[day.lower().strip('.')]
+                daydiff = int_day - today_int  # TODO: Fix this calc so it wraps over a week.  Research needed
+                str_date = '{}T{}'.format(str(today_date + timedelta(days=(daydiff))),row[2])
+                final_start_dates.add(arrow.get(str_date).replace(tzinfo=tz.gettz(row[4])))
+        self.start_datetimes = sorted(final_start_dates)
+
+    def print_final_times(self):
+        for final_date in self.start_datetimes:
+            print('{} type {}'.format(final_date, type(final_date)))
 
     def calc_end_time(self):
         """Take the start time + duration to calculate end time
            Not sure if this will be used"""
         pass
 
-    def gen_start_times(self):
-        """take the starting time, combine with days, return an array of date time stamps"""
-        int_days = []
-        for day in self.days.split(','):
-            int_days.append(daymap[day.lower().strip('.')])
-        print(int_days)
-
-
 if __name__ == '__main__':
-    example = TimeSlot('N7DFL',
-                       'M,T,W,Th,F',
-                       '12:00',
-                       '3600')
-    example.fetch_timeslots()
-    example.check_exists()
-    example.gen_start_times()
+    example_slot = TimeSlot('N7DFL',
+                            'T,Th',
+                            '09:00',
+                            '3600')
+    location_slots = LocationTimeSlots(example_slot.callsign)
+    example_slot.check_exists()
+    location_slots.fetch_timeslots()
+    location_slots.gen_start_times()
+    location_slots.print_final_times()
