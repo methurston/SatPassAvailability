@@ -22,7 +22,6 @@ degrees_per_radian = 180.0 / math.pi
 db_name = config['datasource']['filename']
 
 
-
 def fetch_sat_tle(sat_name):
     query = 'SELECT name, lineone, linetwo FROM satellites where name like ?;'
     params = (sat_name,)
