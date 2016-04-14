@@ -28,6 +28,6 @@ To use as it currently exists:
 8. Run python tlehandler.py - This will seed the satellite database with the latest info from amsat.
 9. Run python UserManager.py - This will fetch geolocation data for the call sign and update the locations table.
 10. Run python TimeSlotHandler.py - This will add timeslots to the timeslots table.  - Edit and repeat this step for different days and start times
-11. Update the sat nam in availablepasses.py
+11. Update the satellite name in availablepasses.py
 12. Run python availablepasses.py to see if there are any passes for the upcoming week.
 
