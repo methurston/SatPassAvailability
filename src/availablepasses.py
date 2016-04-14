@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import arrow
-import sys
-sys.path.append('../src')
 from dateutil import tz
 import TimeSlotHandler
 import SatTrack
@@ -20,6 +18,16 @@ user_timeslots = TimeSlotHandler.LocationTimeSlots('N7DFL')
 user_timeslots.fetch_timeslots()
 user_timeslots.gen_start_times()
 
+def format_pass(mypass):
+    """pretty print a result set from pyephem.nextpass
+       TODO: Convert everything to local TZ"""
+    print('Rise Time: {}'.format(mypass[0]))
+    print('Rise Azimuth: {}'.format(mypass[1]))
+    print('Max Altitude Time: {}'.format(mypass[2]))
+    print('Max Altitude: {}'.format(mypass[3]))
+    print('Set Time: {}'.format(mypass[4]))
+    print('Set Azimuth: {}'.format(mypass[5]))
+
 for startDTS in user_timeslots.start_datetimes:
     original_timezone = startDTS.datetime.tzinfo
     utc_start_time = startDTS.astimezone(tz = tz.gettz('utc'))
@@ -30,3 +38,4 @@ for startDTS in user_timeslots.start_datetimes:
         print('Timeslot: {}'.format(startDTS))
         validpass = arrow.get(satpass[0].datetime())
         print('{} has a pass starting at: {}'.format(sat_name, validpass.astimezone(tz=original_timezone)))
+        format_pass(satpass)
