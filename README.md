@@ -1,5 +1,5 @@
-# SatTrack
-Under documented and tested idea where a user can find out if an amateur radio satellite pass is going to occur when the user (location) is available.
+# Sat Pass Availability 
+Under documented and barely tested proof of concept where a user can find out if an amateur radio satellite pass is going to occur when the user (location) is available.
 
 There are 3 main data objects.
 
