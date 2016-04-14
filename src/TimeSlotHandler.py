@@ -127,6 +127,7 @@ class LocationTimeSlots(object):
         self.all_timeslots = existing
         conn.close()
 
+
     def gen_start_times(self):
         """take the starting time, combine with days, return an array of date time stamps"""
         final_start_dates = set() # This allows us to toss out duplicates.
@@ -137,6 +138,8 @@ class LocationTimeSlots(object):
             for day in row[1].split(','):
                 int_day = daymap[day.lower().strip('.')]
                 daydiff = int_day - today_int  # TODO: Fix this calc so it wraps over a week.  Research needed
+                if daydiff <= 0:
+                    daydiff += 7
                 str_date = '{}T{}'.format(str(today_date + timedelta(days=(daydiff))),row[2])
                 final_start_dates.add(arrow.get(str_date).replace(tzinfo=tz.gettz(row[4])))
         self.start_datetimes = sorted(final_start_dates)
