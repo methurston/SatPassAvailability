@@ -14,5 +14,19 @@ There are 3 main data objects.
 SatTrack.py puts all of the information together and uses PyEphem to calculate the next pass from a given time, lat, lon, and elevation.  This will then spit out a list of potential good passes when the location is available to work the sat.
 
 
-There's a long todo list.  Ultimately this will be wrapped into a REST API.
+There's a long todo list including formatting, correecting timezones in places.  Ultimately this will be wrapped into a REST API.
+
+To use as it currently exists:
+
+1. Create a new sqlite3 database.
+2. Apply the schema.sql to the newly created DB.
+3. Copy sampleconfig.json to config.json.
+4. Update config.json to point at the newly created sqlite3 database.
+5. Change the callsign in __main__ of UserManager.py to your own.
+6. Edit the __main__ section of TimeSlotHandler for your availability.
+7. Run python tlehandler.py - This will seed the satellite database with the latest info from amsat.
+8. Run python UserManager.py - This will fetch geolocation data for the call sign and update the locations table.
+9. Run python TimeSlotHandler.py - This will add timeslots to the timeslots table.  - Edit and repeat this step for different days and start times
+10. Update the sat nam in availablepasses.py
+11. Run python availablepasses.py to see if there are any passes for the upcoming week.
 
