@@ -39,6 +39,7 @@ daymap = {'m': 1,
           'f': 5,
           'fri': 5,
           'friday': 5,
+          's': 6,
           'sa': 6,
           'sat': 6,
           'saturday': 6,
@@ -137,7 +138,7 @@ class LocationTimeSlots(object):
         for row in self.all_timeslots:
             for day in row[1].split(','):
                 int_day = daymap[day.lower().strip('.')]
-                daydiff = int_day - today_int  # TODO: Fix this calc so it wraps over a week.  Research needed
+                daydiff = int_day - today_int
                 if daydiff <= 0:
                     daydiff += 7
                 str_date = '{}T{}'.format(str(today_date + timedelta(days=(daydiff))),row[2])
@@ -148,16 +149,11 @@ class LocationTimeSlots(object):
         for final_date in self.start_datetimes:
             print('{} type {}'.format(final_date, type(final_date)))
 
-    def calc_end_time(self):
-        """Take the start time + duration to calculate end time
-           Not sure if this will be used"""
-        pass
-
 if __name__ == '__main__':
     example_slot = TimeSlot('N7DFL',
-                            'T,Th',
-                            '03:00',
-                            '3600')
+                            'Sat,Su,M,T,W,Th,F',
+                            '21:00',
+                            '4800')
     location_slots = LocationTimeSlots(example_slot.callsign)
     example_slot.check_exists()
     location_slots.fetch_timeslots()
