@@ -22,7 +22,6 @@ degrees_per_radian = 180.0 / math.pi
 db_name = config['datasource']['filename']
 
 
-
 def fetch_sat_tle(sat_name):
     query = 'SELECT name, lineone, linetwo FROM satellites where name like ?;'
     params = (sat_name,)
@@ -39,7 +38,7 @@ def fetch_sat_tle(sat_name):
 
 
 def fetch_location(name):
-    query = 'SELECT callsign, lat, lon, elevation FROM locations where callsign = ?;'
+    query = 'SELECT callsign, lat, lon, elevation, timezone FROM locations where callsign = ?;'
     params = (name,)
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
@@ -54,12 +53,11 @@ def fetch_location(name):
         conn.close()
         sys.exit()
     else:
-        print(all_locs)
+        # print(all_locs)
         location = ephem.Observer()
         location.lat = all_locs[0][1] * ephem.degree
         location.lon = all_locs[0][2] * ephem.degree
         location.elevation = all_locs[0][3]
-        print(location.elevation)
     conn.close()
     return location
 
