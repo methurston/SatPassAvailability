@@ -7,35 +7,50 @@ import SatTrack
 
 # """sample code to show how functions work
 #    Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
-sat_name = 'SO-50'
-sat = SatTrack.fetch_sat_tle(sat_name)
-loc = SatTrack.fetch_location('N7DFL')
-sat.compute(loc)
+sat_names = ['SO-50', 'AO-85']
 
-satpass = loc.next_pass(sat)
+loc = SatTrack.fetch_location('N7DFL')
 
 user_timeslots = TimeSlotHandler.LocationTimeSlots('N7DFL')
 user_timeslots.fetch_timeslots()
 user_timeslots.gen_start_times()
+available_passes = []
 
-def format_pass(mypass):
-    """pretty print a result set from pyephem.nextpass
-       TODO: Convert everything to local TZ"""
-    print('Rise Time: {}'.format(mypass[0]))
-    print('Rise Azimuth: {}'.format(mypass[1]))
-    print('Max Altitude Time: {}'.format(mypass[2]))
-    print('Max Altitude: {}'.format(mypass[3]))
-    print('Set Time: {}'.format(mypass[4]))
-    print('Set Azimuth: {}'.format(mypass[5]))
+
+class AvailablePass(object):
+    def __init__(self, name, ephem_pass):
+        self.name = name
+        self.rise_time = arrow.get(ephem_pass[0].datetime())
+        self.rise_azimuth = ephem_pass[1]
+        self.max_elev_time = arrow.get(ephem_pass[2].datetime())
+        self.max_elevation = ephem_pass[3]
+        self.set_time = arrow.get(ephem_pass[4].datetime())
+        self.set_azimuth = ephem_pass[5]
+
+    def convert_pass_tz(self, loc_timezone):
+        self.rise_time = self.rise_time.astimezone(tz=loc_timezone)
+        self.max_elev_time = self.max_elev_time.astimezone(tz=loc_timezone)
+        self.set_time = self.set_time.astimezone(tz=loc_timezone)
+
+    def format_output(self):
+        print(self.name)
+        print('\tRise: {} - Azimuth: {}'.format(self.rise_time, self.rise_azimuth))
+        print('\tMax elevation: {} - Azimuth: {}: '.format(self.max_elev_time, self.max_elevation))
+        print('\tSet: {} - Azimuth of {}'.format(self.set_time, self.set_azimuth))
 
 for startDTS in user_timeslots.start_datetimes:
-    original_timezone = startDTS.datetime.tzinfo
-    utc_start_time = startDTS.astimezone(tz = tz.gettz('utc'))
-    loc.date = utc_start_time #.datetime
-    satpass = loc.next_pass(sat)
-    time_diff = abs(satpass[0].datetime() - loc.date.datetime())
-    if time_diff.seconds <= 3600:
-        print('Timeslot: {}'.format(startDTS))
-        validpass = arrow.get(satpass[0].datetime())
-        print('{} has a pass starting at: {}'.format(sat_name, validpass.astimezone(tz=original_timezone)))
-        format_pass(satpass)
+    for sat_name in sat_names:
+        sat = SatTrack.fetch_sat_tle(sat_name)
+        sat.compute(loc)
+        original_timezone = startDTS.datetime.tzinfo
+        utc_start_time = startDTS.astimezone(tz = tz.gettz('utc'))
+        loc.date = utc_start_time #.datetime
+        satpass = loc.next_pass(sat)
+        time_diff = abs(satpass[0].datetime() - loc.date.datetime())
+        if time_diff.seconds <= 3600:
+            print('Timeslot: {}'.format(startDTS))
+            validpass = AvailablePass(sat_name, satpass)
+            validpass.convert_pass_tz(original_timezone)
+            available_passes.append(validpass)
+            validpass.format_output()
+
