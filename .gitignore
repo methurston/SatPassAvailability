@@ -1,0 +1,6 @@
+.idea/
+sats.db
+*.iml
+scratchpad/*
+config.json
+*.pyc
