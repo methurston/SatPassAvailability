@@ -72,7 +72,7 @@ def get_tle_file_age():
     else:
         string_tle_age = result[0][0]
         time_tle_age = dateutil.parser.parse(string_tle_age)
-        tle_age = (datetime.now() - time_tle_age).days  # TODO: update this to days.
+        tle_age = (datetime.now() - time_tle_age).days
     return tle_age
 
 
