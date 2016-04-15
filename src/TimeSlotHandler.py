@@ -113,6 +113,7 @@ class LocationTimeSlots(object):
     """Time slots associated with a specific location."""
     def __init__(self, callsign):
         self.callsign = callsign
+        self.start_datetimes = None
 
     def fetch_timeslots(self):
         """fetches existing timeslots"""
@@ -128,13 +129,11 @@ class LocationTimeSlots(object):
         self.all_timeslots = existing
         conn.close()
 
-
     def gen_start_times(self):
         """take the starting time, combine with days, return an array of date time stamps"""
-        final_start_dates = set() # This allows us to toss out duplicates.
+        final_start_dates = set()  # This allows us to toss out duplicates.
         today_int = arrow.now().isoweekday()
         today_date = arrow.now().date()
-        # print('Today is: {} - Int: {}'.format(today_date, today_int))
         for row in self.all_timeslots:
             for day in row[1].split(','):
                 int_day = daymap[day.lower().strip('.')]
@@ -152,8 +151,8 @@ class LocationTimeSlots(object):
 if __name__ == '__main__':
     example_slot = TimeSlot('N7DFL',
                             'Sat,Su,M,T,W,Th,F',
-                            '21:00',
-                            '4800')
+                            '12:00',
+                            '3600')
     location_slots = LocationTimeSlots(example_slot.callsign)
     example_slot.check_exists()
     location_slots.fetch_timeslots()
