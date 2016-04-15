@@ -7,7 +7,7 @@ import SatTrack
 
 # """sample code to show how functions work
 #    Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
-sat_names = ['SO-50', 'AO-85']
+sat_names = ['SO-50', 'LilacSat-2', 'AO-85']
 
 loc = SatTrack.fetch_location('N7DFL')
 
@@ -35,7 +35,7 @@ class AvailablePass(object):
     def format_output(self):
         print(self.name)
         print('\tRise: {} - Azimuth: {}'.format(self.rise_time, self.rise_azimuth))
-        print('\tMax elevation: {} - Azimuth: {}: '.format(self.max_elev_time, self.max_elevation))
+        print('\tMax elevation: {} - Elevation: {}: '.format(self.max_elev_time, self.max_elevation))
         print('\tSet: {} - Azimuth of {}'.format(self.set_time, self.set_azimuth))
 
 for startDTS in user_timeslots.start_datetimes:
@@ -43,8 +43,8 @@ for startDTS in user_timeslots.start_datetimes:
         sat = SatTrack.fetch_sat_tle(sat_name)
         sat.compute(loc)
         original_timezone = startDTS.datetime.tzinfo
-        utc_start_time = startDTS.astimezone(tz = tz.gettz('utc'))
-        loc.date = utc_start_time #.datetime
+        utc_start_time = startDTS.astimezone(tz=tz.gettz('utc'))
+        loc.date = utc_start_time
         satpass = loc.next_pass(sat)
         time_diff = abs(satpass[0].datetime() - loc.date.datetime())
         if time_diff.seconds <= 3600:
@@ -53,4 +53,3 @@ for startDTS in user_timeslots.start_datetimes:
             validpass.convert_pass_tz(original_timezone)
             available_passes.append(validpass)
             validpass.format_output()
-
