@@ -26,3 +26,12 @@ start_time text,
 duration INT,
 FOREIGN KEY(callsign) REFERENCES locations(callsign)
 );
+
+CREATE TABLE satellite_info
+(
+name text,
+uplink REAL,
+downlink REAL,
+modes text,
+FOREIGN KEY(name) REFERENCES satellites(name)
+);
