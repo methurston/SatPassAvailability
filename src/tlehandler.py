@@ -121,7 +121,7 @@ if __name__ == '__main__':
     print('Age of newest record: {}'.format(file_age))
     if file_age >= file_age_threshold:
         print('Satellite records are out of date, updating')
-        raw_tle = fetch_tle_file('celestrak', 'ham')
+        raw_tle = fetch_tle_file('amsat', 'ham')
         parsed_tle = parse_tle_file(raw_tle)
         for tle in parsed_tle:
             tle.update_or_store()
