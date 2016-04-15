@@ -136,7 +136,7 @@ class LocationTimeSlots(object):
         today_date = arrow.now().date()
         for row in self.all_timeslots:
             for day in row[1].split(','):
-                int_day = daymap[day.lower().strip('.')]
+                int_day = daymap[day.lower().strip('. ')]
                 daydiff = int_day - today_int
                 if daydiff <= 0:
                     daydiff += 7
@@ -149,10 +149,10 @@ class LocationTimeSlots(object):
             print('{} type {}'.format(final_date, type(final_date)))
 
 if __name__ == '__main__':
-    example_slot = TimeSlot('N7DFL',
-                            'Sat,Su,M,T,W,Th,F',
-                            '12:00',
-                            '3600')
+    example_slot = TimeSlot('W1AW',
+                            'Sat, Sun,M,T,W,Th,F',
+                            '21:00',
+                            '4800')
     location_slots = LocationTimeSlots(example_slot.callsign)
     example_slot.check_exists()
     location_slots.fetch_timeslots()
