@@ -6,17 +6,18 @@ import datetime
 import TimeSlotHandler
 import SatTrack
 import json
+import sys
 
-# """sample code to show how functions work
-#    Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
-sat_names = ['SO-50', 'LilacSat-2', 'AO-85']
-
-loc = SatTrack.fetch_location('N7DFL')
-
-user_timeslots = TimeSlotHandler.LocationTimeSlots('N7DFL')
-user_timeslots.fetch_timeslots()
-user_timeslots.gen_start_times()
-available_passes = []
+# Globals
+try:
+    with open('../config/config.json') as configuration_file:
+        config = json.load(configuration_file)
+except IOError:
+    print('Config File not found')
+    sys.exit()
+except ValueError as e:
+    print('Invalid JSON: Error was: {}'.format(e))
+    sys.exit()
 
 
 def date_to_string(dateobject):
@@ -58,6 +59,15 @@ class AvailablePass(object):
 
 
 if __name__ == '__main__':
+    """sample code to show how functions work Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
+    sat_names = ['SO-50', 'LilacSat-2', 'AO-85']
+    test_call = config['default_location']['callsign']
+    loc = SatTrack.fetch_location(test_call)
+    user_timeslots = TimeSlotHandler.LocationTimeSlots(test_call)
+    user_timeslots.fetch_timeslots()
+    user_timeslots.gen_start_times()
+    available_passes = []
+
     for startDTS in user_timeslots.start_datetimes:
         for sat_name in sat_names:
             sat = SatTrack.fetch_sat_tle(sat_name)

@@ -4,6 +4,10 @@
     "tle_file": 3,
     "qth_data": 30
   },
+  "default_location": {
+    "callsign": "W1AW",
+    "timezone": "US/Eastern"
+  },
   "datasource": {
     "type": "sqlite3",
     "filename": "../sats.db",

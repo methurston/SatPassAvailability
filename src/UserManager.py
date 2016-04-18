@@ -65,7 +65,7 @@ class User(object):
 
 
 if __name__ == '__main__':
-    test_callsign = 'W1AW'
+    test_callsign = config['default_location']['callsign']
     fullLoc = json.loads(lookup_callsign(test_callsign))
     myUser = User(test_callsign, fullLoc['location']['latitude'], fullLoc['location']['longitude'], 'US/Eastern')
     myUser.store_user()
