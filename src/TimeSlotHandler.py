@@ -149,7 +149,7 @@ class LocationTimeSlots(object):
             print('{} type {}'.format(final_date, type(final_date)))
 
 if __name__ == '__main__':
-    test_callsign = config['default_location']['callsign;]
+    test_callsign = config['default_location']['callsign']
     example_slot = TimeSlot(test_callsign,
                             'Sat, Sun,M,T,W,Th,F',
                             '21:00',
