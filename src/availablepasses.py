@@ -2,8 +2,10 @@
 from __future__ import print_function
 import arrow
 from dateutil import tz
+import datetime
 import TimeSlotHandler
 import SatTrack
+import json
 
 # """sample code to show how functions work
 #    Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
@@ -15,6 +17,17 @@ user_timeslots = TimeSlotHandler.LocationTimeSlots('N7DFL')
 user_timeslots.fetch_timeslots()
 user_timeslots.gen_start_times()
 available_passes = []
+
+
+def date_to_string(dateobject):
+    """Helper function to convert the various DateTime back to strings for jsonification"""
+    if isinstance(dateobject, arrow.arrow.Arrow):
+        stringdate = dateobject.isoformat()
+        return stringdate
+    elif isinstance(dateobject, datetime.datetime):
+        stringdate = dateobject.isoformat()
+    return stringdate
+    raise TypeError ('Type not serilizeable')
 
 
 class AvailablePass(object):
@@ -38,18 +51,27 @@ class AvailablePass(object):
         print('\tMax elevation: {} - Elevation: {}: '.format(self.max_elev_time, self.max_elevation))
         print('\tSet: {} - Azimuth of {}'.format(self.set_time, self.set_azimuth))
 
-for startDTS in user_timeslots.start_datetimes:
-    for sat_name in sat_names:
-        sat = SatTrack.fetch_sat_tle(sat_name)
-        sat.compute(loc)
-        original_timezone = startDTS.datetime.tzinfo
-        utc_start_time = startDTS.astimezone(tz=tz.gettz('utc'))
-        loc.date = utc_start_time
-        satpass = loc.next_pass(sat)
-        time_diff = abs(satpass[0].datetime() - loc.date.datetime())
-        if time_diff.seconds <= 3600:
-            print('Timeslot: {}'.format(startDTS))
-            validpass = AvailablePass(sat_name, satpass)
-            validpass.convert_pass_tz(original_timezone)
-            available_passes.append(validpass)
-            validpass.format_output()
+    def jsonify(self):
+        """Return object as JSON string.  This is typeconversion hell."""
+        todict = vars(self)
+        return json.dumps(todict, indent=1, default=date_to_string)
+
+
+if __name__ == '__main__':
+    for startDTS in user_timeslots.start_datetimes:
+        for sat_name in sat_names:
+            sat = SatTrack.fetch_sat_tle(sat_name)
+            sat.compute(loc)
+            original_timezone = startDTS.datetime.tzinfo
+            utc_start_time = startDTS.astimezone(tz=tz.gettz('utc'))
+            loc.date = utc_start_time
+            satpass = loc.next_pass(sat)
+            time_diff = abs(satpass[0].datetime() - loc.date.datetime())
+            if time_diff.seconds <= 3600:
+                print('Timeslot: {}'.format(startDTS))
+                validpass = AvailablePass(sat_name, satpass)
+                validpass.convert_pass_tz(original_timezone)
+                available_passes.append(validpass)
+                jsonpass = validpass.jsonify()
+                print(jsonpass)
+                #validpass.format_output()
