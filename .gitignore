@@ -4,3 +4,5 @@
 scratchpad/*
 config.json
 *.pyc
+*.renamed
+MTConfig.json
