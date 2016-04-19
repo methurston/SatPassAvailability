@@ -5,6 +5,7 @@ import os
 import fnmatch
 import pytz
 import sys
+import sqlite3
 
 # Hardcoded sections
 usersource = {
@@ -45,6 +46,7 @@ def find_db():
 def get_db_name():
     """Generates the datasource section of the config file.
     sqlite3 is the only type supported"""
+    # TODO: Fix file name for relative path.
     available_dbs = find_db()
     total_dbs = len(available_dbs)
     if total_dbs == 0:
@@ -78,6 +80,17 @@ def get_db_name():
             'Existing': existing}
 
 
+def init_db(config_object):
+    with open('config/schema.sql') as schema:
+        db_schema = schema.read()
+    if config_object['datasource']['Existing'] == False:
+        conn = sqlite3.connect(config_object['datasource']['filename'])
+        cursor = conn.cursor()
+        cursor.executescript(db_schema)
+        conn.commit()
+        conn.close()
+
+
 def get_callinfo():
     callsign = raw_input('Enter Callsign: ')
     userzone = raw_input('Enter Timezone: ')
@@ -106,8 +119,8 @@ def write_db_file(config_dict):
 
 
 def get_age_threshold():
-    tle_age = raw_input('Max age of tle files (days)? ')
-    qth_data = raw_input('Time before retreiving new QTH data (days)? ')
+    tle_age = int(raw_input('Max age of tle files (days)? '))
+    qth_data = int(raw_input('Time before retreiving new QTH data (days)? '))
     return {"tle_file": tle_age,
             "qth_data": qth_data}
 
@@ -126,3 +139,4 @@ blah = {'name': 'blah',
 
 #print(json.dumps(blah, indent=2))
 write_db_file(blah)
+init_db(blah)
