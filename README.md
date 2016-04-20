@@ -53,7 +53,6 @@ Then it uses that Lat/Long to get the elevation from Google.
     Repeat this step to add different start times.
 
 8. Update the satellite names on line 63 of availablepasses.py
-
 9. Run python availablepasses.py to see if there are any passes for the upcoming week.
 
 #TODO:
