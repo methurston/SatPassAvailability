@@ -74,17 +74,22 @@ def get_db_name():
                 print('Invalid entry, Valid values are integers or \'N\' for a new db')
                 get_db_name()
     return {'type': 'sqlite3',
-            'filename': db_name,
+            'filename': '../{}'.format(db_name),
             'Username': None,
             'Password': None,
             'Existing': existing}
 
 
 def init_db(config_object):
+    filename = config_object['datasource']['filename']
+    curdir = os.getcwd()
+    if filename[:3] == '../' and curdir[:-3] != 'src':
+        filename = filename[3:]
+        print(filename)
     with open('config/schema.sql') as schema:
         db_schema = schema.read()
     if config_object['datasource']['Existing'] == False:
-        conn = sqlite3.connect(config_object['datasource']['filename'])
+        conn = sqlite3.connect(filename)
         cursor = conn.cursor()
         cursor.executescript(db_schema)
         conn.commit()

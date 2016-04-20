@@ -106,7 +106,7 @@ def parse_tle_file(tle_file):
         single_tle = []
         innercount = 0
         while innercount <= 2:
-            single_tle.append(tle_list[current_line + innercount])
+            single_tle.append(tle_list[current_line + innercount].strip())
             innercount += 1
         tle_objects.append(Tle(single_tle[0].strip(), single_tle[1], single_tle[2]))
         current_line += 3
