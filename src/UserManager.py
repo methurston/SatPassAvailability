@@ -70,4 +70,4 @@ if __name__ == '__main__':
     fullLoc = json.loads(lookup_callsign(test_callsign))
     myUser = User(test_callsign, fullLoc['location']['latitude'], fullLoc['location']['longitude'], test_timezone)
     myUser.store_user()
-    print(myUser.callsign)
+    print('Added {}'.format(myUser.callsign))
