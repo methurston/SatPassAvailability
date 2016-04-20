@@ -88,7 +88,7 @@ def init_db(config_object):
         print(filename)
     with open('config/schema.sql') as schema:
         db_schema = schema.read()
-    if config_object['datasource']['Existing'] == False:
+    if not config_object['datasource']['Existing']:
         conn = sqlite3.connect(filename)
         cursor = conn.cursor()
         cursor.executescript(db_schema)
@@ -100,9 +100,9 @@ def get_callinfo():
     callsign = raw_input('Enter Callsign: ')
     userzone = raw_input('Enter Timezone: ')
     try:
-         pytz.timezone(userzone)
+        pytz.timezone(userzone)
     except pytz.UnknownTimeZoneError as err:
-        print('Invalid Timezone entered.')
+        print('Invalid Timezone entered.\n {}'.format(err))
         userzone = raw_input('Enter Timezone: ')
     return {'callsign': callsign.upper(),
             'timezone': userzone
@@ -130,8 +130,8 @@ def get_age_threshold():
             "qth_data": qth_data}
 
 
-datasource= get_db_name()
-default_location= get_callinfo()
+datasource = get_db_name()
+default_location = get_callinfo()
 age_threshold = get_age_threshold()
 
 blah = {'name': 'blah',
@@ -142,6 +142,6 @@ blah = {'name': 'blah',
         'usersource': usersource,
         }
 
-#print(json.dumps(blah, indent=2))
+# print(json.dumps(blah, indent=2))
 write_db_file(blah)
 init_db(blah)

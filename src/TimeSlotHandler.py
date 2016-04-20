@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import arrow
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil import tz
 import sqlite3
 import json
+import sys
 
 # globals
 try:
@@ -109,11 +110,13 @@ class TimeSlot(object):
             print('Record Already Exists')
         conn.close()
 
+
 class LocationTimeSlots(object):
     """Time slots associated with a specific location."""
-    def __init__(self, callsign):
+    def __init__(self, callsign, all_timeslots=None):
         self.callsign = callsign
         self.start_datetimes = None
+        self.all_timeslots = all_timeslots
 
     def fetch_timeslots(self):
         """fetches existing timeslots"""
@@ -140,7 +143,7 @@ class LocationTimeSlots(object):
                 daydiff = int_day - today_int
                 if daydiff <= 0:
                     daydiff += 7
-                str_date = '{}T{}'.format(str(today_date + timedelta(days=(daydiff))),row[2])
+                str_date = '{}T{}'.format(str(today_date + timedelta(days=daydiff)), row[2])
                 final_start_dates.add(arrow.get(str_date).replace(tzinfo=tz.gettz(row[4])))
         self.start_datetimes = sorted(final_start_dates)
 
@@ -152,7 +155,7 @@ if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
     example_slot = TimeSlot(test_callsign,
                             'Sat, Sun,M,T,W,Th,F',
-                            '21:00',
+                            '12:00',
                             '4800')
     location_slots = LocationTimeSlots(example_slot.callsign)
     example_slot.check_exists()

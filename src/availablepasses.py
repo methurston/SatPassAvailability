@@ -28,7 +28,6 @@ def date_to_string(dateobject):
     elif isinstance(dateobject, datetime.datetime):
         stringdate = dateobject.isoformat()
     return stringdate
-    raise TypeError ('Type not serilizeable')
 
 
 class AvailablePass(object):

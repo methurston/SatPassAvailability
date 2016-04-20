@@ -89,8 +89,8 @@ def fetch_tle_file(host, satellite_type):
     try:
         all_tle = requests.get(finalurl).content
         # print('All: {}'.format(all_tle))
-    except Exception as e:
-        print('Error Retreiving {},\n error is {}'.format(finalurl, e))
+    except Exception as err:
+        print('Error Retreiving {},\n error is {}'.format(finalurl, err))
         sys.exit()
     return all_tle
 

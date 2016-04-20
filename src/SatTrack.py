@@ -24,6 +24,7 @@ db_name = config['datasource']['filename']
 
 def fetch_sat_tle(sat_name):
     query = 'SELECT name, lineone, linetwo FROM satellites where name like ?;'
+    # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
     params = ('%{}%'.format(sat_name),)
     # print(query)
     conn = sqlite3.connect(db_name)
