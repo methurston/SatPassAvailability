@@ -60,3 +60,8 @@ Then it uses that Lat/Long to get the elevation from Google.
 2. Consider implementing ORM and Schema control. (http://docs.peewee-orm.com/en/latest/)
 3. Wrap the whole damn thing in flask and make it a rest API.
 4. Return valid JSON with human readable values for each item.  (Required for #3)
+
+#Issues:
+For some reason calculations for AO-85 are slightly off from the pass prediction on amsat.org. SO-50 and ISS match predictions.
+
+Max elevation AZ is not matching amsat.
