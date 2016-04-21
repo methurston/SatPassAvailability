@@ -72,7 +72,7 @@ if __name__ == '__main__':
             sat = SatTrack.fetch_sat_tle(sat_name)
             sat.compute(loc)
             original_timezone = startDTS.datetime.tzinfo
-            utc_start_time = startDTS.astimezone(tz=tz.gettz('utc'))
+            utc_start_time = startDTS.astimezone(tz=tz.gettz('UTC'))
             loc.date = utc_start_time
             satpass = loc.next_pass(sat)
             time_diff = abs(satpass[0].datetime() - loc.date.datetime())
