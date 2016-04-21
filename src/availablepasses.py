@@ -57,7 +57,7 @@ class AvailablePass(object):
     def format_output(self):
         print(self.name)
         print('\tRise: {} - Azimuth: {}'.format(self.rise_time, self.rise_azimuth))
-        print('\tMax elevation: {} - Elevation: {}: '.format(self.max_elev_az, self.max_elevation))
+        print('\tMax elevation AZ: {} - Elevation: {}: '.format(self.max_elev_az, self.max_elevation))
         print('\tSet: {} - Azimuth of {}'.format(self.set_time, self.set_azimuth))
 
     def jsonify(self):
@@ -93,7 +93,8 @@ if __name__ == '__main__':
                 validpass = AvailablePass(sat_name, satpass)
                 validpass.convert_pass_tz(original_timezone)
                 available_passes.append(validpass)
-                validpass.format_output()
                 loc.date = validpass.max_elev_time.astimezone(tz=tz.gettz('UTC'))
                 sat.compute(loc)
+                validpass.max_elev_az = sat.az
+                validpass.format_output()
                 print('AZ at Max EL: {}'.format(sat.az))
