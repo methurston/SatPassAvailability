@@ -154,8 +154,8 @@ class LocationTimeSlots(object):
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
     example_slot = TimeSlot(test_callsign,
-                            'Sat, Sun,M,T,W,Th,F',
-                            '12:00',
+                            'W,Th,F',
+                            '21:00',
                             '4800')
     location_slots = LocationTimeSlots(example_slot.callsign)
     example_slot.check_exists()

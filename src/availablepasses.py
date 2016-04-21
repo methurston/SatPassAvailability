@@ -7,6 +7,7 @@ import TimeSlotHandler
 import SatTrack
 import json
 import sys
+from pprint import pprint
 
 # Globals
 try:
@@ -18,6 +19,13 @@ except IOError:
 except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
     sys.exit()
+
+
+def dump(obj):
+    for attr in dir(obj):
+        if hasattr( obj, attr ):
+            print( "obj.%s = %s" % (attr, getattr(obj, attr)))
+
 
 
 def date_to_string(dateobject):
@@ -39,6 +47,7 @@ class AvailablePass(object):
         self.max_elevation = ephem_pass[3]
         self.set_time = arrow.get(ephem_pass[4].datetime())
         self.set_azimuth = ephem_pass[5]
+        self.max_elev_az = None
 
     def convert_pass_tz(self, loc_timezone):
         self.rise_time = self.rise_time.astimezone(tz=loc_timezone)
@@ -48,7 +57,7 @@ class AvailablePass(object):
     def format_output(self):
         print(self.name)
         print('\tRise: {} - Azimuth: {}'.format(self.rise_time, self.rise_azimuth))
-        print('\tMax elevation: {} - Elevation: {}: '.format(self.max_elev_time, self.max_elevation))
+        print('\tMax elevation: {} - Elevation: {}: '.format(self.max_elev_az, self.max_elevation))
         print('\tSet: {} - Azimuth of {}'.format(self.set_time, self.set_azimuth))
 
     def jsonify(self):
@@ -57,9 +66,12 @@ class AvailablePass(object):
         return json.dumps(todict, indent=1, default=date_to_string)
 
 
+
+
+
 if __name__ == '__main__':
     """sample code to show how functions work Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
-    sat_names = ['SO-50']
+    sat_names = ['ISS']
     test_call = config['default_location']['callsign']
     loc = SatTrack.fetch_location(test_call)
     user_timeslots = TimeSlotHandler.LocationTimeSlots(test_call)
@@ -81,6 +93,7 @@ if __name__ == '__main__':
                 validpass = AvailablePass(sat_name, satpass)
                 validpass.convert_pass_tz(original_timezone)
                 available_passes.append(validpass)
-                # jsonpass = validpass.jsonify()
-                # print(jsonpass)
                 validpass.format_output()
+                loc.date = validpass.max_elev_time.astimezone(tz=tz.gettz('UTC'))
+                sat.compute(loc)
+                print('AZ at Max EL: {}'.format(sat.az))
