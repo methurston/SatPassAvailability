@@ -27,12 +27,10 @@ def dump(obj):
             print( "obj.%s = %s" % (attr, getattr(obj, attr)))
 
 
-
 def date_to_string(dateobject):
     """Helper function to convert the various DateTime back to strings for jsonification"""
     if isinstance(dateobject, arrow.arrow.Arrow):
         stringdate = dateobject.isoformat()
-        return stringdate
     elif isinstance(dateobject, datetime.datetime):
         stringdate = dateobject.isoformat()
     return stringdate
@@ -64,9 +62,6 @@ class AvailablePass(object):
         """Return object as JSON string.  This is typeconversion hell."""
         todict = vars(self)
         return json.dumps(todict, indent=1, default=date_to_string)
-
-
-
 
 
 if __name__ == '__main__':
