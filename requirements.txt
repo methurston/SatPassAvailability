@@ -2,6 +2,7 @@ arrow==0.7.0
 click==6.6
 decorator==4.0.9
 geocoder==1.11.1
+peewee==2.8.0
 pyephem==3.7.6.0
 python-dateutil==2.5.2
 pytz==2016.3
