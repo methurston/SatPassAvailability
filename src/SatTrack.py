@@ -5,6 +5,7 @@ import ephem
 import math
 from datetime import datetime
 import sys
+from model import *
 import json
 
 # globals
@@ -18,48 +19,27 @@ except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
     sys.exit()
 
-degrees_per_radian = 180.0 / math.pi
-db_name = config['datasource']['filename']
+# degrees_per_radian = 180.0 / math.pi
+
+# db_name = config['datasource']['filename']
 
 
 def fetch_sat_tle(sat_name):
-    query = 'SELECT name, lineone, linetwo FROM satellites where name like ?;'
-    # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
-    params = ('%{}%'.format(sat_name),)
-    # print(query)
-    conn = sqlite3.connect(db_name)
-    cursor = conn.cursor()
-    c = cursor.execute(query, params)
-    first_match = c.fetchone()
-    satellite = ephem.readtle(str(first_match[0]),
-                              str(first_match[1]),
-                              str(first_match[2]))
-    conn.close()
+    pattern = '%{}%'.format(sat_name)
+    db_satellite = Satellite.get(Satellite.name ** pattern)
+    satellite = ephem.readtle(str(db_satellite.name).strip(),
+                              str(db_satellite.lineone).strip(),
+                              str(db_satellite.linetwo).strip())
+    print(satellite)
     return satellite
 
 
 def fetch_location(name):
-    query = 'SELECT callsign, lat, lon, elevation, timezone FROM locations where callsign = ?;'
-    params = (name,)
-    conn = sqlite3.connect(db_name)
-    cursor = conn.cursor()
-    c = cursor.execute(query, params)
-    all_locs = c.fetchall()
-    if len(all_locs) == 0:
-        print('Location Not Found')
-        conn.close()
-        sys.exit()
-    elif len(all_locs) > 1:
-        print('Multiple locations found, check username')
-        conn.close()
-        sys.exit()
-    else:
-        # print(all_locs)
-        location = ephem.Observer()
-        location.lat = all_locs[0][1] * ephem.degree
-        location.lon = all_locs[0][2] * ephem.degree
-        location.elevation = all_locs[0][3]
-    conn.close()
+    db_location = Location.get(Location.callsign == name)
+    location = ephem.Observer()
+    location.lat = db_location.lat * ephem.degree
+    location.lon = db_location.lon * ephem.degree
+    location.elevation = db_location.elevation
     return location
 
 

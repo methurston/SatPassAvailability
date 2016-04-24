@@ -2,8 +2,8 @@
 from __future__ import print_function
 from geocoder import google
 import requests
-import json
-import sqlite3
+from peewee import *
+from model import *
 import sys
 
 # Globals
@@ -49,20 +49,23 @@ class User(object):
         self.lon = lon
         self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
         self.timezone = timezone
+        self.new_user = False  # assume it's an existing
 
     def store_user(self):
-        query = 'INSERT OR REPLACE INTO locations (callsign, lat, lon, elevation, timezone) ' \
-                'VALUES (?, ?, ?, ?, ?)'
-        params = (self.callsign,
-                  self.lat,
-                  self.lon,
-                  self.elevation,
-                  self.timezone)
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        conn.commit()
-        conn.close()
+        self.user_exist()
+        new_user = Location(callsign=self.callsign,
+                            lat=self.lat,
+                            lon=self.lon,
+                            elevation=self.elevation,
+                            timezone=self.timezone)
+        new_user.save(force_insert=self.new_user)
+
+    def user_exist(self):
+        try:
+            Location.get(callsign=self.callsign)
+        except:
+            print('Location does not exist')
+            self.new_user = True
 
 
 if __name__ == '__main__':

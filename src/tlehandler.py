@@ -4,7 +4,6 @@ import requests
 from datetime import datetime
 import dateutil.parser
 import sys
-# import json
 from model import *
 from peewee import *
 
@@ -20,6 +19,7 @@ except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
     sys.exit()
 
+# Read in config values
 file_age_threshold = config['age_thresholds']['tle_file']
 tle_source = config['satsource']['amsat']
 
@@ -44,7 +44,8 @@ class Tle(object):
 
 def get_tle_file_age():
     """get_tle_file_age:  Finds the age of the newest TLE record in the DB.
-       Returns a tu"""
+       Return: tuple (age, no_sats)
+       if no satellites are loaded, no_sats is True"""
     max_age = Satellite.select(fn.Max(Satellite.updateDTS)).scalar()
     if max_age is None:
         tle_age = file_age_threshold + 1
@@ -69,8 +70,8 @@ def fetch_tle_file(host, satellite_type):
 
 
 def parse_tle_file(tle_file):
-    """Takes the raw data from celestrak and parses the data into an object representing the
-    two line format"""
+    """Takes the raw data from celestrak or amsat and parses the data into an object representing the
+       two line format"""
     tle_objects = []
     tle_list = tle_file.splitlines()
     remain = len(tle_list)
