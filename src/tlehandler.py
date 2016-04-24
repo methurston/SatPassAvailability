@@ -2,10 +2,9 @@
 from __future__ import print_function
 import requests
 from datetime import datetime
-import sqlite3
 import dateutil.parser
 import sys
-import json
+# import json
 from model import *
 from peewee import *
 
@@ -21,7 +20,6 @@ except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
     sys.exit()
 
-# db_name = config['datasource']['filename']
 file_age_threshold = config['age_thresholds']['tle_file']
 tle_source = config['satsource']['amsat']
 

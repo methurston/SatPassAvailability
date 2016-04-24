@@ -1,7 +1,20 @@
 from peewee import *
+import json
 
 
-db = SqliteDatabase('peewee.db')
+# Globals
+try:
+    with open('../config/config.json') as configuration_file:
+        config = json.load(configuration_file)
+except IOError:
+    print('Config File not found')
+    sys.exit()
+except ValueError as e:
+    print('Invalid JSON: Error was: {}'.format(e))
+    sys.exit()
+
+
+db = SqliteDatabase(config['datasource']['filename'])
 
 
 class BaseModel(Model):
