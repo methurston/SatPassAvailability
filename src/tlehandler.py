@@ -6,6 +6,9 @@ import sqlite3
 import dateutil.parser
 import sys
 import json
+from model import *
+from peewee import *
+
 
 # Globals
 try:
@@ -18,8 +21,9 @@ except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
     sys.exit()
 
-db_name = config['datasource']['filename']
+# db_name = config['datasource']['filename']
 file_age_threshold = config['age_thresholds']['tle_file']
+tle_source = config['satsource']['amsat']
 
 
 class Tle(object):
@@ -31,61 +35,32 @@ class Tle(object):
         self.linetwo = linetwo
         self.age = datetime.now()
 
-    def store(self):
-        """write values to DB"""
-        query = 'INSERT OR REPLACE INTO satellites (name, lineone, linetwo, updateDTS)' \
-                'VALUES(?, ?, ?, ?);'
-        params = (self.name,
-                  self.lineone,
-                  self.linetwo,
-                  self.age.isoformat())
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        conn.commit()
-
-    def update_or_store(self):
-        """Check the age of the existing record, if it's over 2 days, pull
-           New values"""
-        age_query = 'SELECT updateDTS FROM satellites where name = ?'
-        params = (self.name,)
-        cursor = conn.cursor()
-        c = cursor.execute(age_query, params)
-        all_match = c.fetchall()
-
-        if len(all_match) == 0:
-            self.store()
-            print('{} Record Added'.format(self.name))
-        elif len(all_match) > 1:
-            print('Multiple rows returned, expected 1. Satellite name was {}'.format(self.name))
-        else:
-            self.store()
-            print('{} Record Updated'.format(self.name))
+    def store(self, first_load):
+        newSat = Satellite(name=self.name,
+                           lineone=self.lineone,
+                           linetwo=self.linetwo,
+                           updateDTS=self.age)
+        newSat.save(force_insert=first_load)
+        print('Saving: {}'.format(newSat.name))
 
 
 def get_tle_file_age():
-    age_query = 'select max(updateDTS) FROM satellites;'
-    cursor = conn.cursor()
-    result = cursor.execute(age_query).fetchall()
-
-    if result[0][0] is None:
+    """get_tle_file_age:  Finds the age of the newest TLE record in the DB.
+       Returns a tu"""
+    max_age = Satellite.select(fn.Max(Satellite.updateDTS)).scalar()
+    if max_age is None:
         tle_age = file_age_threshold + 1
+        no_sats = True
     else:
-        string_tle_age = result[0][0]
-        time_tle_age = dateutil.parser.parse(string_tle_age)
+        time_tle_age = dateutil.parser.parse(max_age)
         tle_age = (datetime.now() - time_tle_age).days
-    return tle_age
+        no_sats = False
+    return tle_age, no_sats
 
 
 def fetch_tle_file(host, satellite_type):
-    if host == 'celestrak':
-        tle_config = config['satsource']['celestrak']
-        finalurl = 'http://{}/NORAD/elements/{}'.format(tle_config['host'], tle_config['filenames'][satellite_type])
-    elif host == 'amsat':
-        tle_config = config['satsource']['amsat']
-        finalurl = 'http://{}/{}/{}'.format(tle_config['host'], tle_config['path'], tle_config['filename'])
-    else:
-        print('Unknown host. String provided was: {}'.format(host))
-        sys.exit()
+    tle_config = config['satsource']['amsat']
+    finalurl = 'http://{}/{}/{}'.format(tle_config['host'], tle_config['path'], tle_config['filename'][satellite_type])
     try:
         all_tle = requests.get(finalurl).content
         # print('All: {}'.format(all_tle))
@@ -114,15 +89,12 @@ def parse_tle_file(tle_file):
 
 
 if __name__ == '__main__':
-    conn = sqlite3.connect(db_name)
     file_age = get_tle_file_age()
     print('Age of newest record: {}'.format(file_age))
-    if file_age >= file_age_threshold:
-        print('Satellite records are out of date, updating')
-        raw_tle = fetch_tle_file('amsat', 'ham')
+    if file_age[0] >= file_age_threshold:
+        print('Satellite records are out of date, updating.')
+        raw_tle = fetch_tle_file(tle_source, 'ham')
         parsed_tle = parse_tle_file(raw_tle)
         for tle in parsed_tle:
-            tle.update_or_store()
-    else:
-        print('Satellite records are up to date.')
-    conn.close()
+            tle.store(file_age[1])
+

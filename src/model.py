@@ -8,15 +8,16 @@ class BaseModel(Model):
     class Meta:
         database = db
 
+
 class Satellite(BaseModel):
-    name = CharField()
+    name = CharField(primary_key=True)
     lineone = CharField()
     linetwo = CharField()
     updateDTS = DateField()
 
 
 class Location(BaseModel):
-    callsign = CharField()
+    callsign = CharField(primary_key=True)
     lat = FloatField()
     lon = FloatField()
     elevation = IntegerField()
@@ -38,4 +39,7 @@ class SatelliteInfo(BaseModel):
 
 
 db.connect()
-db.create_tables([Satellite, Location, Timeslot, SatelliteInfo])
+if len(db.get_tables()) == 0:
+    print 'Schema not found: creating'
+    all_tables = [Satellite, Location, Timeslot, SatelliteInfo]
+    db.create_tables(all_tables)
