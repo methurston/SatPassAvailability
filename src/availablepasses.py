@@ -7,7 +7,6 @@ import TimeSlotHandler
 import SatTrack
 import json
 import sys
-from pprint import pprint
 
 # Globals
 try:

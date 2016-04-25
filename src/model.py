@@ -1,6 +1,7 @@
+from __future__ import print_function
 from peewee import *
 import json
-
+import sys
 
 # Globals
 try:
@@ -53,6 +54,6 @@ class SatelliteInfo(BaseModel):
 
 db.connect()
 if len(db.get_tables()) == 0:
-    print 'Schema not found: creating'
+    print('Schema not found: creating')
     all_tables = [Satellite, Location, Timeslot, SatelliteInfo]
     db.create_tables(all_tables)

@@ -2,7 +2,6 @@
 from __future__ import print_function
 from geocoder import google
 import requests
-from peewee import *
 from model import *
 import sys
 
@@ -61,6 +60,7 @@ class User(object):
         new_user.save(force_insert=self.new_user)
 
     def user_exist(self):
+        """sets new_user to true if it's not in the Database."""
         try:
             Location.get(callsign=self.callsign)
         except:
