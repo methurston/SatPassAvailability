@@ -3,9 +3,7 @@ from __future__ import print_function
 import arrow
 from datetime import timedelta
 from dateutil import tz
-import sqlite3
-import json
-import sys
+from model import *
 
 # globals
 try:
@@ -19,7 +17,6 @@ except ValueError as e:
     sys.exit()
 
 db_name = config['datasource']['filename']
-
 
 # daymap maps common day names and abbreviations to isoweekday() values i.e Monday = 1, Tuesday = 2 ...
 daymap = {'m': 1,
@@ -47,6 +44,7 @@ daymap = {'m': 1,
           'su': 7,
           'sun': 7,
           'sunday': 7}
+
 iso_day_name = {1: 'Monday',
                 2: 'Tuesday',
                 3: 'Wednesday',
@@ -55,24 +53,17 @@ iso_day_name = {1: 'Monday',
                 6: 'Saturday',
                 7: 'Sunday'}
 
-# def get_user_timezone(call):
-#     query = 'SELECT timezone from locations WHERE callsign = ?'
-#     params = (call, )
-#     conn = sqlite3.connect(db_name)
-#     cursor = conn.cursor()
-#     result = cursor.execute(query, params)
-#     user_timezone =
 
-
-class TimeSlot(object):
+class TimeSlotObj(object):
     """ This class generates and stores time slots for a specific location"""
     def __init__(self, callsign, days, start_time, duration):
         self.callsign = callsign
         self.days = days
         self.start_time = start_time
         self.duration = duration
+        self.new_timeslot = None
 
-    def store_timeslot(self):
+    def old_store_timeslot(self):
         """Writes the timeslot record to the database.
            Called by check existing, If this function is called directly, the row will be duplicated."""
         query = 'INSERT INTO timeslots (callsign, weekdays, start_time, duration) ' \
@@ -87,7 +78,31 @@ class TimeSlot(object):
         conn.commit()
         conn.close()
 
-    def check_exists(self):
+    def timeslot_exists(self):
+        try:
+            Timeslot.get(callsign=self.callsign,
+                            weekdays= self.days,
+                            start_time=self.start_time,
+                            duration=self.duration)
+            print('Slot already exists')
+        except:
+            print('Timeslot does not exist')
+            self.new_timeslot = True
+
+
+    def store_timeslot(self):
+        self.timeslot_exists()
+        if self.new_timeslot is True:
+            new_timeslot = Timeslot(callsign=self.callsign,
+                                    weekdays= self.days,
+                                    start_time=self.start_time,
+                                    duration=self.duration)
+            new_timeslot.save()
+
+
+
+
+    def old_check_exists(self):
         """Queries to see if row exists, if not write it to DB."""
         query = 'SELECT callsign, weekdays, start_time, duration ' \
                 'FROM timeslots ' \
@@ -118,7 +133,7 @@ class LocationTimeSlots(object):
         self.start_datetimes = None
         self.all_timeslots = all_timeslots
 
-    def fetch_timeslots(self):
+    def old_fetch_timeslots(self):
         """fetches existing timeslots"""
         query = 'SELECT ts.callsign, ts.weekdays, ts.start_time, ts.duration, l.timezone ' \
                 'FROM timeslots ts JOIN locations l ' \
@@ -132,8 +147,15 @@ class LocationTimeSlots(object):
         self.all_timeslots = existing
         conn.close()
 
+    def fetch_timeslots(self):
+        query = Timeslot.select().join(Location).where(Location.callsign == self.callsign)
+        for row in query:
+            print(row.callsign, row.weekdays, row.start_time, row.duration)
+            print(row.__dict__)
+
+
     def gen_start_times(self):
-        """take the starting time, combine with days, return an array of date time stamps"""
+        """take the starting tsime, combine with days, return an array of date time stamps"""
         final_start_dates = set()  # This allows us to toss out duplicates.
         today_int = arrow.now().isoweekday()
         today_date = arrow.now().date()
@@ -153,12 +175,12 @@ class LocationTimeSlots(object):
 
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
-    example_slot = TimeSlot(test_callsign,
-                            'W,Th,F',
+    example_slot = TimeSlotObj(test_callsign,
+                            'M,W,F',
                             '21:00',
                             '4800')
+    example_slot.store_timeslot()
     location_slots = LocationTimeSlots(example_slot.callsign)
-    example_slot.check_exists()
     location_slots.fetch_timeslots()
     location_slots.gen_start_times()
     location_slots.print_final_times()

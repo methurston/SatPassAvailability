@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import sqlite3
 import ephem
-import math
 from datetime import datetime
-import sys
 from model import *
 import json
 
@@ -18,10 +15,6 @@ except IOError:
 except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
     sys.exit()
-
-# degrees_per_radian = 180.0 / math.pi
-
-# db_name = config['datasource']['filename']
 
 
 def fetch_sat_tle(sat_name):
