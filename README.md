@@ -14,8 +14,7 @@ There are 3 main data objects.
 SatTrack.py puts all of the information together and uses PyEphem to calculate the next pass from a given time, lat, lon, and elevation.  This will then spit out a list of potential good passes when the location is available to work the sat.
 
 
-To use as it currently exists:
-# How to use
+# Instructions
 It's recommended to set up a Python 2.7 virtualenv for use.
 
 1. Clone this repo.
