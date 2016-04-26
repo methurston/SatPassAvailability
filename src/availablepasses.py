@@ -22,8 +22,8 @@ except ValueError as e:
 
 def dump(obj):
     for attr in dir(obj):
-        if hasattr( obj, attr ):
-            print( "obj.%s = %s" % (attr, getattr(obj, attr)))
+        if hasattr(obj, attr):
+            print("obj.%s = %s" % (attr, getattr(obj, attr)))
 
 
 def date_to_string(dateobject):
@@ -65,7 +65,7 @@ class AvailablePass(object):
 
 if __name__ == '__main__':
     """sample code to show how functions work Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
-    sat_names = ['ISS']
+    sat_names = ['SO-50']
     test_call = config['default_location']['callsign']
     loc = SatTrack.fetch_location(test_call)
     user_timeslots = TimeSlotHandler.LocationTimeSlots(test_call)
@@ -73,17 +73,18 @@ if __name__ == '__main__':
     user_timeslots.gen_start_times()
     available_passes = []
 
-    for startDTS in user_timeslots.start_datetimes:
+    for pass_time in user_timeslots.start_datetimes:
+        # pass_time is a tuple of (starting time (user timezone), duration (seconds)
         for sat_name in sat_names:
             sat = SatTrack.fetch_sat_tle(sat_name)
             sat.compute(loc)
-            original_timezone = startDTS.datetime.tzinfo
-            utc_start_time = startDTS.astimezone(tz=tz.gettz('UTC'))
+            original_timezone = pass_time[0].datetime.tzinfo
+            utc_start_time = pass_time[0].astimezone(tz=tz.gettz('UTC'))
             loc.date = utc_start_time
             satpass = loc.next_pass(sat)
             time_diff = abs(satpass[0].datetime() - loc.date.datetime())
-            if time_diff.seconds <= 3600:
-                print('Timeslot: {}'.format(startDTS))
+            if time_diff.seconds <= pass_time[1]:  # TODO - Change to duration. Just figure out scope
+                print('Available starting time: {}'.format(pass_time[0]))
                 validpass = AvailablePass(sat_name, satpass)
                 validpass.convert_pass_tz(original_timezone)
                 available_passes.append(validpass)
@@ -91,4 +92,3 @@ if __name__ == '__main__':
                 sat.compute(loc)
                 validpass.max_elev_az = sat.az
                 validpass.format_output()
-                print('AZ at Max EL: {}'.format(sat.az))
