@@ -23,7 +23,6 @@ def fetch_sat_tle(sat_name):
     satellite = ephem.readtle(str(db_satellite.name).strip(),
                               str(db_satellite.lineone).strip(),
                               str(db_satellite.linetwo).strip())
-    print(satellite)
     return satellite
 
 
