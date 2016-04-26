@@ -3,7 +3,6 @@ from __future__ import print_function
 import requests
 from datetime import datetime
 import dateutil.parser
-import sys
 from model import *
 from peewee import *
 
@@ -34,12 +33,12 @@ class Tle(object):
         self.age = datetime.now()
 
     def store(self, first_load):
-        newSat = Satellite(name=self.name,
-                           lineone=self.lineone,
-                           linetwo=self.linetwo,
-                           updateDTS=self.age)
-        newSat.save(force_insert=first_load)
-        print('Saving: {}'.format(newSat.name))
+        new_sat = Satellite(name=self.name,
+                            lineone=self.lineone,
+                            linetwo=self.linetwo,
+                            updateDTS=self.age)
+        new_sat.save(force_insert=first_load)
+        print('Saving: {}'.format(new_sat.name))
 
 
 def get_tle_file_age():
@@ -57,7 +56,7 @@ def get_tle_file_age():
     return tle_age, no_sats
 
 
-def fetch_tle_file(host, satellite_type):
+def fetch_tle_file(satellite_type):
     tle_config = config['satsource']['amsat']
     finalurl = 'http://{}/{}/{}'.format(tle_config['host'], tle_config['path'], tle_config['filename'][satellite_type])
     try:
@@ -92,7 +91,7 @@ if __name__ == '__main__':
     print('Age of newest record: {}'.format(file_age))
     if file_age[0] >= file_age_threshold:
         print('Satellite records are out of date, updating.')
-        raw_tle = fetch_tle_file(tle_source, 'ham')
+        raw_tle = fetch_tle_file('ham')
         parsed_tle = parse_tle_file(raw_tle)
         for tle in parsed_tle:
             tle.store(file_age[1])
