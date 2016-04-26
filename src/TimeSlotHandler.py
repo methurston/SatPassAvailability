@@ -10,7 +10,7 @@ try:
     with open('../config/config.json') as configuration_file:
         config = json.load(configuration_file)
 except IOError:
-    print('Config File not found')
+    print('Config File not found, run configbuilder.py from the parent directory')
     sys.exit()
 except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
