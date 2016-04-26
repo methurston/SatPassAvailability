@@ -63,67 +63,25 @@ class TimeSlotObj(object):
         self.duration = duration
         self.new_timeslot = None
 
-    def old_store_timeslot(self):
-        """Writes the timeslot record to the database.
-           Called by check existing, If this function is called directly, the row will be duplicated."""
-        query = 'INSERT INTO timeslots (callsign, weekdays, start_time, duration) ' \
-                'VALUES (?, ?, ?, ?)'
-        params = (self.callsign,
-                  self.days,
-                  self.start_time,
-                  self.duration)
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        conn.commit()
-        conn.close()
-
     def timeslot_exists(self):
         try:
             Timeslot.get(callsign=self.callsign,
-                            weekdays= self.days,
-                            start_time=self.start_time,
-                            duration=self.duration)
+                         weekdays=self.days,
+                         start_time=self.start_time,
+                         duration=self.duration)
             print('Slot already exists')
         except:
             print('Timeslot does not exist')
             self.new_timeslot = True
 
-
     def store_timeslot(self):
         self.timeslot_exists()
         if self.new_timeslot is True:
             new_timeslot = Timeslot(callsign=self.callsign,
-                                    weekdays= self.days,
+                                    weekdays=self.days,
                                     start_time=self.start_time,
                                     duration=self.duration)
             new_timeslot.save()
-
-
-
-
-    def old_check_exists(self):
-        """Queries to see if row exists, if not write it to DB."""
-        query = 'SELECT callsign, weekdays, start_time, duration ' \
-                'FROM timeslots ' \
-                'WHERE callsign = ? ' \
-                'AND weekdays = ? ' \
-                'AND start_time = ? ' \
-                'AND duration = ?'
-        params = (self.callsign,
-                  self.days,
-                  self.start_time,
-                  self.duration)
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
-        results = cursor.execute(query, params)
-        existing = results.fetchall()
-        if len(existing) == 0:
-            self.store_timeslot()
-            print('Record Stored')
-        else:
-            print('Record Already Exists')
-        conn.close()
 
 
 class LocationTimeSlots(object):
@@ -133,40 +91,28 @@ class LocationTimeSlots(object):
         self.start_datetimes = None
         self.all_timeslots = all_timeslots
 
-    def old_fetch_timeslots(self):
-        """fetches existing timeslots"""
-        query = 'SELECT ts.callsign, ts.weekdays, ts.start_time, ts.duration, l.timezone ' \
-                'FROM timeslots ts JOIN locations l ' \
-                'ON ts.callsign = l.callsign ' \
-                'WHERE l.callsign = ?'
-        param = (self.callsign,)
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
-        results = cursor.execute(query, param)
-        existing = results.fetchall()
-        self.all_timeslots = existing
-        conn.close()
-
     def fetch_timeslots(self):
-        query = Timeslot.select().join(Location).where(Location.callsign == self.callsign)
-        for row in query:
-            print(row.callsign, row.weekdays, row.start_time, row.duration)
-            print(row.__dict__)
-
+        """Fetch all stored timeslots for a callsign
+        Set self.all_timeslots to the output"""
+        self.all_timeslots = Timeslot.select(Timeslot.callsign,
+                                             Timeslot.weekdays,
+                                             Timeslot.start_time,
+                                             Timeslot.duration).join(Location).where(Location.callsign == self.callsign)
 
     def gen_start_times(self):
-        """take the starting tsime, combine with days, return an array of date time stamps"""
+        """take the starting time, combine with days, return an array of date time stamps"""
         final_start_dates = set()  # This allows us to toss out duplicates.
         today_int = arrow.now().isoweekday()
         today_date = arrow.now().date()
         for row in self.all_timeslots:
-            for day in row[1].split(','):
+            for day in row.weekdays.split(','):
                 int_day = daymap[day.lower().strip('. ')]
                 daydiff = int_day - today_int
                 if daydiff <= 0:
                     daydiff += 7
-                str_date = '{}T{}'.format(str(today_date + timedelta(days=daydiff)), row[2])
-                final_start_dates.add(arrow.get(str_date).replace(tzinfo=tz.gettz(row[4])))
+                str_date = '{}T{}'.format(str(today_date + timedelta(days=daydiff)), row.start_time)
+                final_start_dates.add((arrow.get(str_date).replace(tzinfo=tz.gettz(row.callsign.timezone)),
+                                       row.duration))
         self.start_datetimes = sorted(final_start_dates)
 
     def print_final_times(self):
@@ -176,9 +122,9 @@ class LocationTimeSlots(object):
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
     example_slot = TimeSlotObj(test_callsign,
-                            'M,W,F',
-                            '21:00',
-                            '4800')
+                               'M,W,F',
+                               '21:00',
+                               '4800')
     example_slot.store_timeslot()
     location_slots = LocationTimeSlots(example_slot.callsign)
     location_slots.fetch_timeslots()
