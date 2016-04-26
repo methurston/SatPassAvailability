@@ -122,9 +122,9 @@ class LocationTimeSlots(object):
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
     example_slot = TimeSlotObj(test_callsign,
-                               'M,W,F',
-                               '21:00',
-                               '4800')
+                               'M,T,W,Th,F',
+                               '12:00',
+                               '3600')
     example_slot.store_timeslot()
     location_slots = LocationTimeSlots(example_slot.callsign)
     location_slots.fetch_timeslots()
