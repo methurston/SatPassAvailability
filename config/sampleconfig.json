@@ -1,38 +1,42 @@
 {
-  "name": "sample configuration file",
-  "age_thresholds": {
-    "tle_file": 3,
-    "qth_data": 30
-  },
-  "default_location": {
-    "callsign": "W1AW",
-    "timezone": "US/Eastern"
-  },
-  "datasource": {
-    "type": "sqlite3",
-    "filename": "../sats.db",
-    "username": null,
-    "password": null
-    },
-  "satsource": {
-    "amsat": {
-      "host": "www.amsat.org",
-      "path": "/amsat/ftp/keps/current/",
-      "filename": "nasabare.txt"
-    },
-    "celestrak": {
-      "host": "www.celestrak.com",
-      "path": null,
-      "filenames": {
-        "ham": "amateur.txt",
-        "amateur": "amateur.txt",
-        "weather": "weather.txt",
-        "wx": "weather.txt",
-        "noaa": "noaa.txt"}
-    }
-  },
+  "name": "blah", 
   "usersource": {
-    "host": "https://callook.info",
-    "username": null
+    "username": null, 
+    "host": "https://callook.info"
+  }, 
+  "satsource": {
+    "celestrak": {
+      "path": null, 
+      "host": "www.celestrak.com", 
+      "filename": {
+        "noaa": "noaa.txt", 
+        "weather": "weather.txt", 
+        "amateur": "amateur.txt", 
+        "ham": "amateur.txt", 
+        "wx": "weather.txt"
+      }
+    }, 
+    "amsat": {
+      "path": "amsat/ftp/keps/current",
+      "host": "www.amsat.org", 
+      "filename":{
+        "ham": "nasabare.txt"
+      }
+    }
+  }, 
+  "age_thresholds": {
+    "qth_data": 30, 
+    "tle_file": 0
+  }, 
+  "datasource": {
+    "Username": null, 
+    "Password": null, 
+    "type": "sqlite3", 
+    "Existing": false, 
+    "filename": "../peewee.db"
+  }, 
+  "default_location": {
+    "timezone": "US/Eastern",
+    "callsign": "W1AW"
   }
 }
