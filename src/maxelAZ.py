@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ephem
 import dateutil.parser
 
@@ -13,7 +14,7 @@ home.elevation = 831
 
 def sample(str_time):
     start_time = dateutil.parser.parse(str_time)
-    print 'Starting Time: {}'.format(start_time)
+    print('Starting Time: {}'.format(start_time))
     so_50.compute(home)
     home.date = start_time
     pass_info = home.next_pass(so_50)
@@ -30,5 +31,5 @@ def sample(str_time):
 
 
 info = sample('2016-04-22T15:00:00.0000Z')
-for k,v in sorted(info.iteritems()):
-    print '\t{:<20} - {}'.format(k, v)
+for k, v in sorted(info.iteritems()):
+    print('\t{:<20} - {}'.format(k, v))
