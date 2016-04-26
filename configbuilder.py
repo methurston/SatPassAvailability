@@ -12,21 +12,25 @@ usersource = {
     "host": "https://callook.info",
     "username": None
 }
+
 satsource = {
-    "amsat": {
-        "host": "www.amsat.org",
-        "path": "/amsat/ftp/keps/current/",
-        "filename": "nasabare.txt"
-    },
     "celestrak": {
-        "host": "www.celestrak.com",
         "path": None,
-        "filenames": {
-            "ham": "amateur.txt",
-            "amateur": "amateur.txt",
+        "host": "www.celestrak.com",
+        "filename": {
+            "noaa": "noaa.txt",
             "weather": "weather.txt",
-            "wx": "weather.txt",
-            "noaa": "noaa.txt"}
+            "amateur": "amateur.txt",
+            "ham": "amateur.txt",
+            "wx": "weather.txt"
+        }
+    },
+    "amsat": {
+        "path": "amsat/ftp/keps/current",
+        "host": "www.amsat.org",
+        "filename": {
+            "ham": "nasabare.txt"
+        }
     }
 }
 
@@ -74,26 +78,10 @@ def get_db_name():
                 print('Invalid entry, Valid values are integers or \'N\' for a new db')
                 get_db_name()
     return {'type': 'sqlite3',
-            'filename': '../{}'.format(db_name),
+            'filename': '../{}'.format(db_name.split('/')[-1]),
             'Username': None,
             'Password': None,
             'Existing': existing}
-
-
-def init_db(config_object):
-    filename = config_object['datasource']['filename']
-    curdir = os.getcwd()
-    if filename[:3] == '../' and curdir[:-3] != 'src':
-        filename = filename[3:]
-        print(filename)
-    with open('config/schema.sql') as schema:
-        db_schema = schema.read()
-    if not config_object['datasource']['Existing']:
-        conn = sqlite3.connect(filename)
-        cursor = conn.cursor()
-        cursor.executescript(db_schema)
-        conn.commit()
-        conn.close()
 
 
 def get_callinfo():
@@ -134,14 +122,11 @@ datasource = get_db_name()
 default_location = get_callinfo()
 age_threshold = get_age_threshold()
 
-blah = {'name': 'blah',
-        'age_thresholds': age_threshold,
-        'default_location': default_location,
-        'datasource': datasource,
-        'satsource': satsource,
-        'usersource': usersource,
-        }
-
-# print(json.dumps(blah, indent=2))
-write_db_file(blah)
-init_db(blah)
+config_object = {'name': 'blah',
+                 'age_thresholds': age_threshold,
+                 'default_location': default_location,
+                 'datasource': datasource,
+                 'satsource': satsource,
+                 'usersource': usersource,
+                 }
+write_db_file(config_object)
