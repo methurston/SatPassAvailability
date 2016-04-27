@@ -52,7 +52,6 @@ def find_db():
 def get_db_name():
     """Generates the datasource section of the config file.
     sqlite3 is the only type supported"""
-    # TODO: Fix file name for relative path.
     available_dbs = find_db()
     total_dbs = len(available_dbs)
     if total_dbs == 0:
@@ -93,7 +92,7 @@ def get_callinfo():
         pytz.timezone(userzone)
     except pytz.UnknownTimeZoneError as err:
         print('Invalid Timezone entered.\n {}'.format(err))
-        userzone = nput('Enter Timezone: ')
+        userzone = raw_input('Enter Timezone: ')
     return {'callsign': callsign.upper(),
             'timezone': userzone
             }
