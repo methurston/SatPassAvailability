@@ -5,7 +5,9 @@ import os
 import fnmatch
 import pytz
 import sys
-import sqlite3
+
+if sys.version[0] == '3':
+    raw_input = input
 
 # Hardcoded sections
 usersource = {
@@ -91,7 +93,7 @@ def get_callinfo():
         pytz.timezone(userzone)
     except pytz.UnknownTimeZoneError as err:
         print('Invalid Timezone entered.\n {}'.format(err))
-        userzone = raw_input('Enter Timezone: ')
+        userzone = nput('Enter Timezone: ')
     return {'callsign': callsign.upper(),
             'timezone': userzone
             }

@@ -71,7 +71,7 @@ class User(object):
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
     test_timezone = config['default_location']['timezone']
-    fullLoc = json.loads(lookup_callsign(test_callsign))
+    fullLoc = json.loads(lookup_callsign(test_callsign).decode())
     myUser = User(test_callsign, fullLoc['location']['latitude'], fullLoc['location']['longitude'], test_timezone)
     myUser.store_user()
     print('Added {}'.format(myUser.callsign))
