@@ -64,7 +64,10 @@ class AvailablePass(object):
 
 
 if __name__ == '__main__':
-    """sample code to show how functions work Compare to http://www.amsat.org/amsat-new/tools/predict/index.php"""
+    """sample code to show how functions work
+       Compare to http://www.amsat.org/amsat-new/tools/predict/index.php
+       or heavens-above.com
+       or n2yo.com"""
     sat_names = ['SO-50']
     test_call = config['default_location']['callsign']
     loc = SatTrack.fetch_location(test_call)
