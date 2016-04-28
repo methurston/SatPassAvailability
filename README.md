@@ -55,17 +55,12 @@ Then it uses that Lat/Long to get the elevation from Google.
 9. Run python availablepasses.py to see if there are any passes for the upcoming week.
 
 #TODO:
-1. Add method to create alternate locations for callsign (i.e. vacation, field days, SOTA, etc).
-    * Implement geocode lookup for address (probably via bing)
-    * Build some sort of interface to enter/validate the data
-1. Research different astronomy libraries as PyEphem doesn't give Max El Azimuth in it's get_pass method.
-   Status:  In progress, AZ is generated, but does not match Amsat predictions.
-2. Consider implementing ~ORM~ and Schema control.
+1. Consider implementing -ORM- and Schema control.
    Status: ORM integration (peewee) complete.  Schema control TBD
-3. Wrap the whole damn thing in flask and make it a rest API.
-4. Return valid JSON with human readable values for each item.  (Required for #3)
+2. Wrap the whole damn thing in flask and make it a rest API.
+3. Return valid JSON with human readable values for each item.  (Required for #3)
 
 #Issues:
 For some reason calculations for AO-85 are slightly off from the pass prediction on amsat.org. SO-50 and ISS match predictions.
 
-Max elevation AZ is not matching amsat.
+Max elevation AZ is not matching amsat. It seems to match other sources.
