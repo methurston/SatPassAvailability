@@ -15,7 +15,8 @@ SatTrack.py puts all of the information together and uses PyEphem to calculate t
 
 
 # Instructions
-It's recommended to set up a Python 2.7 virtualenv for use.
+It's recommended to set up a Python 2.7 or 3.5 virtualenv for use. As of writing, both versions are supported,
+Version 3.5 will be the primary version supported going forward.
 
 1. Clone this repo.
 2. Install the required libraries via pip (pip install --upgrade -r requriements.txt)
