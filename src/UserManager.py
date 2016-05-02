@@ -21,11 +21,10 @@ callsign_url = config['usersource']['host']
 db_name = config['datasource']['filename']
 
 
-
 def lookup_callsign(callsign):
     finalurl = '{}/{}/json'.format(callsign_url, callsign)
     callook_info = requests.get(finalurl)
-    return callook_info.content
+    return json.loads(callook_info.content.decode())
 
 
 def get_elevation(latlon):
@@ -35,7 +34,7 @@ def get_elevation(latlon):
 
 
 class User(object):
-    def __init__(self, callsign, lat, lon, timezone, street_address = None):
+    def __init__(self, callsign, lat, lon, timezone, street_address=None):
         self.callsign = callsign
         self.lat = lat
         self.lon = lon
@@ -75,8 +74,8 @@ class User(object):
         self.lon = address_details.lng
         self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
 
-class UserAPI(object):
 
+class UserAPI(object):
     def on_get(self, req, resp, callsign):
         user = Location.get(callsign=callsign)
         userdict = {
@@ -90,46 +89,58 @@ class UserAPI(object):
         resp.status = falcon.HTTP_200
 
     def on_put(self, req, resp, callsign):
+        resp_dict = {}
         if req.content_type == 'application/json':
             api_input = req.stream.read().decode()
-            input_obj = json.loads(api_input)
-            if input_obj['lat'] is None and input_obj['long'] is None and input_obj['street_address'] is None:
-                # TODO: add lookup here
+            try:
+                input_obj = json.loads(api_input)
+                if input_obj['lat'] is None and input_obj['long'] is None and input_obj['street_address'] is None:
+                    lookup_data = lookup_callsign(input_obj['callsign'])
+                    if lookup_data['status'] == 'VALID':
+                        input_obj['lat'] = lookup_data['location']['latitude']
+                        input_obj['long'] = lookup_data['location']['longitude']
+                        resp.status = falcon.HTTP_204
+                    else:
+                        resp.status = falcon.HTTP_400
+                        resp_dict = {'error': 'Invalid Parameters',
+                                     'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
+                else:
+                    try:
+                        new_user = User(input_obj['callsign'],
+                                   input_obj['lat'],
+                                   input_obj['long'],
+                                   input_obj['timezone'],
+                                   input_obj['street_address'])
+                        new_user.store_user()
+                        resp.status = falcon.HTTP_204
+                    except TypeError as e:
+                        resp.status = falcon.HTTP_500
+                        resp_dict = {'error': 'Invalid value for property provided',
+                                     'details': e.args}
+                    except KeyError as k:
+                        resp.status = falcon.HTTP_400 # This should probably be 422, but my falcon install doesn't have it.
+                        resp_dict = {'error': 'Missing Property',
+                                     'property name': k.args[0]}
+            except ValueError as e:
+                resp_dict = {'error': 'Invalid JSON',
+                             'details': e.args[0]}
                 resp.status = falcon.HTTP_400
-                resp_dict = {'error': 'Invalid Parameters',
-                             'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
-                resp.body = json.dumps(resp_dict)
-            else:
-                try:
-                    foo = User(input_obj['callsign'],
-                               input_obj['lat'],
-                               input_obj['long'],
-                               input_obj['timezone'],
-                               input_obj['street_address'])
-                    foo.store_user()
-                    resp.status = falcon.HTTP_204
-                except TypeError as e:
-                    resp.status = falcon.HTTP_500
-                    resp_dict = {'error': 'Invalid value for property provided',
-                                 'details': e.args}
-                    resp.body = json.dumps(resp_dict)
-                except KeyError as k:
-                    resp.status = falcon.HTTP_400 # This should probably be 422, but my falcon install doesn't have it.
-                    resp_dict = {'error': 'Missing Property',
-                                 'property name': k.args[0]}
-                    resp.body = json.dumps(resp_dict)
         else:
             resp.status = falcon.HTTP_415
-            resp.body = '{"error":"Content must be sent with a type of application/json"}'
+            resp_dict = '{"error":"Content must be sent with a type of application/json"}'
+        resp.body = json.dumps(resp_dict)
 
 
 if __name__ == '__main__':
     # test_callsign = config['default_location']['callsign']
     test_callsign = 'N7M'
     test_timezone = config['default_location']['timezone']
-    fullLoc = json.loads(lookup_callsign(test_callsign).decode())
+    fullLoc = lookup_callsign(test_callsign)
     if fullLoc['status'] == 'VALID':
-        myUser = User(test_callsign, fullLoc['location']['latitude'], fullLoc['location']['longitude'], test_timezone)
+        myUser = User(test_callsign,
+                      fullLoc['location']['latitude'],
+                      fullLoc['location']['longitude'],
+                      test_timezone)
         myUser.store_user()
     else:
         myUser = User(test_callsign, None, None, test_timezone)
