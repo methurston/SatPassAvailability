@@ -4,6 +4,7 @@ import arrow
 from datetime import timedelta
 from dateutil import tz
 from model import *
+import falcon
 
 # globals
 try:
@@ -118,6 +119,27 @@ class LocationTimeSlots(object):
     def print_final_times(self):
         for final_date in self.start_datetimes:
             print('{} type {}'.format(final_date, type(final_date)))
+
+
+class TimeSlotAPI(object):
+    def on_get(self, req, resp, callsign):
+        resp_list = []
+        timeslots = LocationTimeSlots(callsign)
+        timeslots.fetch_timeslots()
+        timeslots.gen_start_times()
+        for row in timeslots.start_datetimes:
+            timedict = {
+                'date': row[0].isoformat(),
+                'duration': row[1]
+            }
+            resp_list.append(timedict)
+        resp_dict = {
+            'User': callsign,
+            'Timeslots': resp_list
+        }
+        resp.body = json.dumps(resp_dict)
+        resp.status = falcon.HTTP_200
+
 
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
