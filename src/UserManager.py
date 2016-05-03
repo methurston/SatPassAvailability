@@ -107,10 +107,10 @@ class UserAPI(object):
                 else:
                     try:
                         new_user = User(input_obj['callsign'],
-                                   input_obj['lat'],
-                                   input_obj['long'],
-                                   input_obj['timezone'],
-                                   input_obj['street_address'])
+                                        input_obj['lat'],
+                                        input_obj['long'],
+                                        input_obj['timezone'],
+                                        input_obj['street_address'])
                         new_user.store_user()
                         resp.status = falcon.HTTP_204
                     except TypeError as e:
