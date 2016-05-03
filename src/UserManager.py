@@ -63,8 +63,8 @@ class User(object):
         """sets new_user to true if it's not in the Database."""
         try:
             Location.get(callsign=self.callsign)
-        except Exception as e:
-            print('{} - Location does not exist'.format(e))
+        except Exception as error_details:
+            print('{} - Location does not exist'.format(error_details))
             self.new_user = True
 
     def set_geo_stats(self):
@@ -76,7 +76,8 @@ class User(object):
 
 
 class UserAPI(object):
-    def on_get(self, req, resp, callsign):
+    @staticmethod
+    def on_get(req, resp, callsign):
         user = Location.get(callsign=callsign)
         userdict = {
             'callsign': user.callsign,
@@ -88,7 +89,8 @@ class UserAPI(object):
         resp.content_type = 'Application/JSON'
         resp.status = falcon.HTTP_200
 
-    def on_put(self, req, resp, callsign):
+    @staticmethod
+    def on_put(req, resp, callsign):
         resp_dict = {}
         if req.content_type == 'application/json':
             api_input = req.stream.read().decode()
@@ -113,17 +115,17 @@ class UserAPI(object):
                                         input_obj['street_address'])
                         new_user.store_user()
                         resp.status = falcon.HTTP_204
-                    except TypeError as e:
+                    except TypeError as error_details:
                         resp.status = falcon.HTTP_500
                         resp_dict = {'error': 'Invalid value for property provided',
-                                     'details': e.args}
+                                     'details': error_details.args}
                     except KeyError as k:
-                        resp.status = falcon.HTTP_400 # This should probably be 422, but my falcon install doesn't have it.
+                        resp.status = falcon.HTTP_400  # This should be 422, pip falcon install doesn't have it.
                         resp_dict = {'error': 'Missing Property',
                                      'property name': k.args[0]}
-            except ValueError as e:
+            except ValueError as error_details:
                 resp_dict = {'error': 'Invalid JSON',
-                             'details': e.args[0]}
+                             'details': error_details.args[0]}
                 resp.status = falcon.HTTP_400
         else:
             resp.status = falcon.HTTP_415
@@ -144,7 +146,8 @@ if __name__ == '__main__':
         myUser.store_user()
     else:
         myUser = User(test_callsign, None, None, test_timezone)
-        myUser.street_address = input('Callsign of {} was not found, please enter a street address: '.format(test_callsign))
+        myUser.street_address = input(
+            'Callsign of {} was not found, please enter a street address: '.format(test_callsign))
         myUser.store_user()
 
     print('Added {}'.format(myUser.callsign))

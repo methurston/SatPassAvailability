@@ -72,7 +72,7 @@ class TimeSlotObj(object):
                          start_time=self.start_time,
                          duration=self.duration)
             print('Slot already exists')
-        except:
+        except Exception as error_details:
             print('Timeslot does not exist')
             self.new_timeslot = True
 
@@ -95,8 +95,8 @@ class TimeSlotObj(object):
                                                        Timeslot.duration == self.duration)
                 delete_query.execute()
                 self.deleted = True
-            except Exception as e:
-                print(e)
+            except Exception as error_details:
+                print(error_details)
 
 
 class LocationTimeSlots(object):
@@ -136,7 +136,8 @@ class LocationTimeSlots(object):
 
 
 class TimeSlotAPI(object):
-    def on_get(self, req, resp, callsign):
+    @staticmethod
+    def on_get(req, resp, callsign):
         resp_list = []
         timeslots = LocationTimeSlots(callsign)
         timeslots.fetch_timeslots()
@@ -154,7 +155,8 @@ class TimeSlotAPI(object):
         resp.body = json.dumps(resp_dict)
         resp.status = falcon.HTTP_200
 
-    def on_put(self, req, resp, callsign):
+    @staticmethod
+    def on_put(req, resp, callsign):
         resp_dict = {}
         if req.content_type == 'application/json':
             api_input = req.stream.read().decode()
@@ -167,24 +169,25 @@ class TimeSlotAPI(object):
                                                input_object['duration'])
                     new_timeslot.store_timeslot()
                     resp.status = falcon.HTTP_204
-                except TypeError as e:
+                except TypeError as error_details:
                     resp.status = falcon.HTTP_500
                     resp_dict = {'error': 'Invalid value for property provided',
-                                 'details': e.args}
+                                 'details': error_details.args}
                 except KeyError as k:
-                    resp.status = falcon.HTTP_400 # This should probably be 422, but my falcon install doesn't have it.
+                    resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
                     resp_dict = {'error': 'Missing Property',
                                  'property name': k.args[0]}
-            except ValueError as e:
+            except ValueError as error_details:
                 resp.status = falcon.HTTP_400
                 resp_dict = {'error': 'Invalid JSON',
-                             'details': e.args[0]}
+                             'details': error_details.args[0]}
         else:
             resp.status = falcon.HTTP_415
             resp_dict = '{"error":"Content must be sent with a type of application/json"}'
         resp.body = json.dumps(resp_dict)
 
-    def on_delete(self, req, resp, callsign):
+    @staticmethod
+    def on_delete(req, resp, callsign):
         resp_dict = {}
         if req.content_type == 'application/json':
             api_input = req.stream.read().decode()
@@ -201,18 +204,18 @@ class TimeSlotAPI(object):
                     else:
                         resp.status = falcon.HTTP_400
                         resp_dict = {'error': 'timeslot does not exist'}
-                except TypeError as e:
+                except TypeError as error_details:
                     resp.status = falcon.HTTP_500
                     resp_dict = {'error': 'Invalid value for property provided',
-                                 'details': e.args}
+                                 'details': error_details.args}
                 except KeyError as k:
-                    resp.status = falcon.HTTP_400 # This should probably be 422, but my falcon install doesn't have it.
+                    resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
                     resp_dict = {'error': 'Missing Property',
                                  'property name': k.args[0]}
-            except ValueError as e:
+            except ValueError as error_details:
                 resp.status = falcon.HTTP_400
                 resp_dict = {'error': 'Invalid JSON',
-                             'details': e.args[0]}
+                             'details': error_details.args[0]}
         else:
             resp.status = falcon.HTTP_415
             resp_dict = {'error': 'Content must be sent with a type of application/json'}

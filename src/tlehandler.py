@@ -7,7 +7,6 @@ from model import *
 from peewee import *
 
 
-
 # Globals
 try:
     with open('../config/config.json') as configuration_file:
