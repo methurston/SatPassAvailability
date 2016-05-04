@@ -1,5 +1,7 @@
 """Module to centralize hooks for @before and @after handlers."""
 import json
+import falcon
+
 
 def validate_type_json(req, resp, resource, params):
     """This function verifys that request is sent as application/json and that the JSON is valid"""
@@ -11,4 +13,5 @@ def validate_type_json(req, resp, resource, params):
         input_object = json.loads(api_input)
         params['input_object'] = input_object
     except ValueError as error_details:
-        raise falcon.HTTPBadRequest(error_details.args[0])
+        msg = 'Invalid JSON'
+        raise falcon.HTTPBadRequest(msg, error_details.args[0])
