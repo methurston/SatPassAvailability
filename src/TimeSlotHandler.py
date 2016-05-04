@@ -5,6 +5,7 @@ from datetime import timedelta
 from dateutil import tz
 from model import *
 import falcon
+import hooks
 
 # globals
 try:
@@ -53,6 +54,9 @@ iso_day_name = {1: 'Monday',
                 5: 'Friday',
                 6: 'Saturday',
                 7: 'Sunday'}
+
+
+
 
 
 class TimeSlotObj(object):
@@ -109,7 +113,8 @@ class LocationTimeSlots(object):
     def fetch_timeslots(self):
         """Fetch all stored timeslots for a callsign
         Set self.all_timeslots to the output"""
-        self.all_timeslots = Timeslot.select(Timeslot.callsign,
+        self.all_timeslots = Timeslot.select(Timeslot.id,
+                                             Timeslot.callsign,
                                              Timeslot.weekdays,
                                              Timeslot.start_time,
                                              Timeslot.duration).join(Location).where(Location.callsign == self.callsign)
@@ -126,7 +131,7 @@ class LocationTimeSlots(object):
                 if daydiff <= 0:
                     daydiff += 7
                 str_date = '{}T{}'.format(str(today_date + timedelta(days=daydiff)), row.start_time)
-                final_start_dates.add((arrow.get(str_date).replace(tzinfo=tz.gettz(row.callsign.timezone)),
+                final_start_dates.add((row.id, arrow.get(str_date).replace(tzinfo=tz.gettz(row.callsign.timezone)),
                                        row.duration))
         self.start_datetimes = sorted(final_start_dates)
 
@@ -144,8 +149,9 @@ class TimeSlotAPI(object):
         timeslots.gen_start_times()
         for row in timeslots.start_datetimes:
             timedict = {
-                'date': row[0].isoformat(),
-                'duration': row[1]
+                'id': row[0],
+                'date': row[1].isoformat(),
+                'duration': row[2]
             }
             resp_list.append(timedict)
         resp_dict = {
@@ -155,70 +161,48 @@ class TimeSlotAPI(object):
         resp.body = json.dumps(resp_dict)
         resp.status = falcon.HTTP_200
 
-    @staticmethod
-    def on_put(req, resp, callsign):
+    @falcon.before(hooks.validate_type_json)
+    def on_put(self, req, resp, callsign, input_object):
         resp_dict = {}
-        if req.content_type == 'application/json':
-            api_input = req.stream.read().decode()
-            try:
-                input_object = json.loads(api_input)
-                try:
-                    new_timeslot = TimeSlotObj(input_object['callsign'],
-                                               input_object['days'],
-                                               input_object['start_time'],
-                                               input_object['duration'])
-                    new_timeslot.store_timeslot()
-                    resp.status = falcon.HTTP_204
-                except TypeError as error_details:
-                    resp.status = falcon.HTTP_500
-                    resp_dict = {'error': 'Invalid value for property provided',
-                                 'details': error_details.args}
-                except KeyError as k:
-                    resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
-                    resp_dict = {'error': 'Missing Property',
-                                 'property name': k.args[0]}
-            except ValueError as error_details:
-                resp.status = falcon.HTTP_400
-                resp_dict = {'error': 'Invalid JSON',
-                             'details': error_details.args[0]}
-        else:
-            resp.status = falcon.HTTP_415
-            resp_dict = '{"error":"Content must be sent with a type of application/json"}'
+        try:
+            new_timeslot = TimeSlotObj(input_object['callsign'],
+                                       input_object['days'],
+                                       input_object['start_time'],
+                                       input_object['duration'])
+            new_timeslot.store_timeslot()
+            resp.status = falcon.HTTP_204
+        except TypeError as error_details:
+            resp.status = falcon.HTTP_500
+            resp_dict = {'error': 'Invalid value for property provided',
+                         'details': error_details.args}
+        except KeyError as k:
+            resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
+            resp_dict = {'error': 'Missing Property',
+                         'property name': k.args[0]}
         resp.body = json.dumps(resp_dict)
 
-    @staticmethod
-    def on_delete(req, resp, callsign):
+    @falcon.before(hooks.validate_type_json)
+    def on_delete(self, req, resp, callsign, input_object):
         resp_dict = {}
-        if req.content_type == 'application/json':
-            api_input = req.stream.read().decode()
-            try:
-                input_object = json.loads(api_input)
-                try:
-                    sent_timeslot = TimeSlotObj(input_object['callsign'],
-                                                input_object['days'],
-                                                input_object['start_time'],
-                                                input_object['duration'])
-                    sent_timeslot.delete_timeslot()
-                    if sent_timeslot.deleted is True:
-                        resp.status = falcon.HTTP_204
-                    else:
-                        resp.status = falcon.HTTP_400
-                        resp_dict = {'error': 'timeslot does not exist'}
-                except TypeError as error_details:
-                    resp.status = falcon.HTTP_500
-                    resp_dict = {'error': 'Invalid value for property provided',
-                                 'details': error_details.args}
-                except KeyError as k:
-                    resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
-                    resp_dict = {'error': 'Missing Property',
-                                 'property name': k.args[0]}
-            except ValueError as error_details:
+        try:
+            sent_timeslot = TimeSlotObj(input_object['callsign'],
+                                        input_object['days'],
+                                        input_object['start_time'],
+                                        input_object['duration'])
+            sent_timeslot.delete_timeslot()
+            if sent_timeslot.deleted is True:
+                resp.status = falcon.HTTP_204
+            else:
                 resp.status = falcon.HTTP_400
-                resp_dict = {'error': 'Invalid JSON',
-                             'details': error_details.args[0]}
-        else:
-            resp.status = falcon.HTTP_415
-            resp_dict = {'error': 'Content must be sent with a type of application/json'}
+                resp_dict = {'error': 'timeslot does not exist'}
+        except TypeError as error_details:
+            resp.status = falcon.HTTP_500
+            resp_dict = {'error': 'Invalid value for property provided',
+                         'details': error_details.args}
+        except KeyError as k:
+            resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
+            resp_dict = {'error': 'Missing Property',
+                         'property name': k.args[0]}
         resp.body = json.dumps(resp_dict)
 
 

@@ -5,6 +5,7 @@ import requests
 from model import *
 import sys
 import falcon
+import hooks
 
 # Globals
 try:
@@ -89,47 +90,37 @@ class UserAPI(object):
         resp.content_type = 'Application/JSON'
         resp.status = falcon.HTTP_200
 
-    @staticmethod
-    def on_put(req, resp, callsign):
+    @falcon.before(hooks.validate_type_json)
+    def on_put(self, req, resp, callsign, input_object):
         resp_dict = {}
-        if req.content_type == 'application/json':
-            api_input = req.stream.read().decode()
-            try:
-                input_obj = json.loads(api_input)
-                if input_obj['lat'] is None and input_obj['long'] is None and input_obj['street_address'] is None:
-                    lookup_data = lookup_callsign(input_obj['callsign'])
-                    if lookup_data['status'] == 'VALID':
-                        input_obj['lat'] = lookup_data['location']['latitude']
-                        input_obj['long'] = lookup_data['location']['longitude']
-                        resp.status = falcon.HTTP_204
-                    else:
-                        resp.status = falcon.HTTP_400
-                        resp_dict = {'error': 'Invalid Parameters',
-                                     'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
-                else:
-                    try:
-                        new_user = User(input_obj['callsign'],
-                                        input_obj['lat'],
-                                        input_obj['long'],
-                                        input_obj['timezone'],
-                                        input_obj['street_address'])
-                        new_user.store_user()
-                        resp.status = falcon.HTTP_204
-                    except TypeError as error_details:
-                        resp.status = falcon.HTTP_500
-                        resp_dict = {'error': 'Invalid value for property provided',
-                                     'details': error_details.args}
-                    except KeyError as k:
-                        resp.status = falcon.HTTP_400  # This should be 422, pip falcon install doesn't have it.
-                        resp_dict = {'error': 'Missing Property',
-                                     'property name': k.args[0]}
-            except ValueError as error_details:
-                resp_dict = {'error': 'Invalid JSON',
-                             'details': error_details.args[0]}
+        #    input_object = json.loads(api_input)
+        if input_object['lat'] is None and input_object['long'] is None and input_object['street_address'] is None:
+            lookup_data = lookup_callsign(input_object['callsign'])
+            if lookup_data['status'] == 'VALID':
+                input_object['lat'] = lookup_data['location']['latitude']
+                input_object['long'] = lookup_data['location']['longitude']
+                resp.status = falcon.HTTP_204
+            else:
                 resp.status = falcon.HTTP_400
+                resp_dict = {'error': 'Invalid Parameters',
+                             'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
         else:
-            resp.status = falcon.HTTP_415
-            resp_dict = '{"error":"Content must be sent with a type of application/json"}'
+            try:
+                new_user = User(input_object['callsign'],
+                                input_object['lat'],
+                                input_object['long'],
+                                input_object['timezone'],
+                                input_object['street_address'])
+                new_user.store_user()
+                resp.status = falcon.HTTP_204
+            except TypeError as error_details:
+                resp.status = falcon.HTTP_500
+                resp_dict = {'error': 'Invalid value for property provided',
+                             'details': error_details.args}
+            except KeyError as k:
+                resp.status = falcon.HTTP_400  # This should be 422, pip falcon install doesn't have it.
+                resp_dict = {'error': 'Missing Property',
+                             'property name': k.args[0]}
         resp.body = json.dumps(resp_dict)
 
 
