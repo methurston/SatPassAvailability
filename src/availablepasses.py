@@ -69,8 +69,30 @@ class AvailablePass(object):
 class AvailablePassAPI(object):
     def on_get(self, req, resp, callsign):
         loc = SatTrack.fetch_location(callsign)
+        loc_timeslots = TimeSlotHandler.LocationTimeSlots(callsign)
+        loc_timeslots.fetch_timeslots()
+        loc_timeslots.gen_start_times()
+        available_passes = []
+
+        for pass_time in user_timeslots.start_datetimes:
+            for sat_name in params['sat_list']:
+                sat = SatTrack.fetch_sat_tle(sat_name)
+                sat.compute(loc)
+                original_timezone = pass_time[0].datetime.tzinfo
+                utc_start_time = pass_time[0].astimezone(tz=tz.gettz('UTC'))
+                loc.date = utc_start_time
+                satpass = loc.next_pass(sat)
+                time_diff = abs(satpass[0].datetime() - loc.date.datetime())
+                if time_diff.seconds <= pass_time[1]:
+                    validpass = AvailablePass(sat_name, satpass)
+                    validpass.convert_pass_tz(original_timezone)
+                    available_passes.append(validpass)
+                    loc.date = validpass.max_elev_time.astimezone(tz=t.gettz('UTC'))
+                    sat.compute(loc)
+                    validpass.max_elev_az = sat.az
+
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps(loc)
+        resp.body = json.dumps(available_passes)
 
 
 
