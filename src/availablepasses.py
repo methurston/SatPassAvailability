@@ -7,6 +7,8 @@ import TimeSlotHandler
 import SatTrack
 import json
 import sys
+import falcon
+import hooks
 
 # Globals
 try:
@@ -61,6 +63,15 @@ class AvailablePass(object):
         """Return object as JSON string.  This is typeconversion hell."""
         todict = vars(self)
         return json.dumps(todict, indent=1, default=date_to_string)
+
+
+@falcon.before(hooks.get_sat_names)
+class AvailablePassAPI(object):
+    def on_get(self, req, resp, callsign):
+        loc = SatTrack.fetch_location(callsign)
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps(loc)
+
 
 
 if __name__ == '__main__':
