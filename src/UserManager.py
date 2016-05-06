@@ -64,7 +64,7 @@ class User(object):
         """sets new_user to true if it's not in the Database."""
         try:
             Location.get(callsign=self.callsign)
-        except Exception as error_details:
+        except Location.DoesNotExist as error_details:
             print('{} - Location does not exist'.format(error_details))
             self.new_user = True
 
