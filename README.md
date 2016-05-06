@@ -59,6 +59,7 @@ Then it uses that Lat/Long to get the elevation from Google.
 1. Consider implementing -ORM- and Schema control.
    Status: ORM integration (peewee) complete.  Schema control TBD
 2. Wrap the whole damn thing in flask and make it a rest API.
+   Status: in branch apitest1.  Using falcon for the API framework
 3. Return valid JSON with human readable values for each item.  (Required for #3)
 
 #Issues:
