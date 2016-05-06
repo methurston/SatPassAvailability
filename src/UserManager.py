@@ -79,12 +79,16 @@ class User(object):
 class UserAPI(object):
     @staticmethod
     def on_get(req, resp, callsign):
-        user = Location.get(callsign=callsign)
+        try:
+            user = Location.get(callsign=callsign)
+        except Exception as error_details:
+            raise falcon.HTTPNotFound()
         userdict = {
             'callsign': user.callsign,
             'lat': user.lat,
             'lon': user.lon,
-            'elevation': user.elevation
+            'elevation': user.elevation,
+            'timezone': user.timezone
         }
         resp.body = json.dumps(userdict)
         resp.content_type = 'Application/JSON'
@@ -103,23 +107,23 @@ class UserAPI(object):
                 resp.status = falcon.HTTP_400
                 resp_dict = {'error': 'Invalid Parameters',
                              'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
-        else:
-            try:
-                new_user = User(input_object['callsign'],
-                                input_object['lat'],
-                                input_object['long'],
-                                input_object['timezone'],
-                                input_object['street_address'])
-                new_user.store_user()
-                resp.status = falcon.HTTP_204
-            except TypeError as error_details:
-                resp.status = falcon.HTTP_500
-                resp_dict = {'error': 'Invalid value for property provided',
-                             'details': error_details.args}
-            except KeyError as k:
-                resp.status = falcon.HTTP_400  # This should be 422, pip falcon install doesn't have it.
-                resp_dict = {'error': 'Missing Property',
-                             'property name': k.args[0]}
+
+        try:
+            new_user = User(input_object['callsign'],
+                            input_object['lat'],
+                            input_object['long'],
+                            input_object['timezone'],
+                            input_object['street_address'])
+            new_user.store_user()
+            resp.status = falcon.HTTP_204
+        except TypeError as error_details:
+            resp.status = falcon.HTTP_500
+            resp_dict = {'error': 'Invalid value for property provided',
+                         'details': error_details.args}
+        except KeyError as k:
+            resp.status = falcon.HTTP_400  # This should be 422, pip falcon install doesn't have it.
+            resp_dict = {'error': 'Missing Property',
+                         'property name': k.args[0]}
         resp.body = json.dumps(resp_dict)
 
 
