@@ -98,7 +98,7 @@ class UserAPI(object):
     def on_put(self, req, resp, callsign, input_object):
         resp_dict = {}
         if input_object['lat'] is None and input_object['long'] is None and input_object['street_address'] is None:
-            lookup_data = lookup_callsign(input_object['callsign'])
+            lookup_data = lookup_callsign(callsign)
             if lookup_data['status'] == 'VALID':
                 input_object['lat'] = lookup_data['location']['latitude']
                 input_object['long'] = lookup_data['location']['longitude']
@@ -107,9 +107,8 @@ class UserAPI(object):
                 resp.status = falcon.HTTP_400
                 resp_dict = {'error': 'Invalid Parameters',
                              'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
-
         try:
-            new_user = User(input_object['callsign'],
+            new_user = User(callsign,
                             input_object['lat'],
                             input_object['long'],
                             input_object['timezone'],
