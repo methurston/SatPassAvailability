@@ -30,6 +30,8 @@ will be generated and an empty schema will be applied.
 
     If no schema exists in the DB, it will be created by model.py.
     On start, the age of the newest TLE record will be checked, if it is out of date (or no TLE entries exist, they will be updated.)
+
+
 #TODO:
 1. Consider implementing Schema control.
 2. Wrap the whole damn thing in flask and make it a rest API.
