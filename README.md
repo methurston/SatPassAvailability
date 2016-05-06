@@ -26,40 +26,15 @@ Version 3.5 will be the primary version supported going forward.
 will be generated and an empty schema will be applied.
 *Note: Schema will not be validated if existing file is used*
 
-4. Insert satellite TLE info (**python src/tlehandler.py**).]
+4. Try launching the application (gunicorn app).
 
-    This script will pull the latest TLE info from amsat.org and load it into the DB.
-
-5. Insert location data about the user (**python src/UserManager.py**).
-
-    This script looks up callsign info from callook.info to get Lat and Long for the callsign's QTH data.
-Then it uses that Lat/Long to get the elevation from Google.
-
-6. Edit the example timeslot in src/TimeSlotHandler.py to list a single availability.
-
-    The structure of the data is:
-
-    `callsign:` Must be a user in the DB, Defaults to value in config.json
-
-    `days:`  A list days that the user has available.  Example: 'Sat, Sun,M,T,W,Th,F'.
-
-    `start time:` The starting time (24h) the user has available. Examlple: '21:00'.
-
-    `duration:` The amount of time the user has available in seconds.  Example: '4800'.
-
-
-7. Populate the timeslots in the database (**python src/TimeSlotHandler.py**).
-
-    Repeat this step to add different start times.
-
-8. Update the satellite names on line 63 of availablepasses.py
-9. Run python availablepasses.py to see if there are any passes for the upcoming week.
-
+    If no schema exists in the DB, it will be created by model.py.
+    On start, the age of the newest TLE record will be checked, if it is out of date (or no TLE entries exist, they will be updated.)
 #TODO:
-1. Consider implementing -ORM- and Schema control.
-   Status: ORM integration (peewee) complete.  Schema control TBD
+1. Consider implementing Schema control.
 2. Wrap the whole damn thing in flask and make it a rest API.
-3. Return valid JSON with human readable values for each item.  (Required for #3)
+  Status: In progress use apitest1 branch
+3. Add Insert Date/Time stamp for users.  Implement a method to update if time threshold has expired.
 
 #Issues:
 For some reason calculations for AO-85 are slightly off from the pass prediction on amsat.org. SO-50 and ISS match predictions.
