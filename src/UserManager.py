@@ -81,7 +81,7 @@ class UserAPI(object):
     def on_get(req, resp, callsign):
         try:
             user = Location.get(callsign=callsign)
-        except Exception as error_details:
+        except Location.DoesNotExist:
             raise falcon.HTTPNotFound()
         userdict = {
             'callsign': user.callsign,
