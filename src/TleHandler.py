@@ -7,7 +7,6 @@ from model import *
 from peewee import *
 
 
-
 # Globals
 try:
     with open('../config/config.json') as configuration_file:
@@ -62,7 +61,6 @@ def fetch_tle_file(satellite_type):
     finalurl = 'http://{}/{}/{}'.format(tle_config['host'], tle_config['path'], tle_config['filename'][satellite_type])
     try:
         all_tle = requests.get(finalurl).content
-        # print('All: {}'.format(all_tle))
     except Exception as err:
         print('Error Retreiving {},\n error is {}'.format(finalurl, err))
         sys.exit()
@@ -87,7 +85,7 @@ def parse_tle_file(tle_file):
     return tle_objects
 
 
-if __name__ == '__main__':
+def UpdateTLE():
     file_age = get_tle_file_age()
     print('Age of newest record: {}'.format(file_age))
     if file_age[0] >= file_age_threshold:

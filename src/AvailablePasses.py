@@ -7,6 +7,9 @@ import TimeSlotHandler
 import SatTrack
 import json
 import sys
+import falcon
+import hooks
+
 
 # Globals
 try:
@@ -20,10 +23,10 @@ except ValueError as e:
     sys.exit()
 
 
-def dump(obj):
-    for attr in dir(obj):
-        if hasattr(obj, attr):
-            print("obj.%s = %s" % (attr, getattr(obj, attr)))
+def angle_to_int(inputAngle):
+    """Converts pyephem.Angle to an int for json output formatting"""
+    angle_array = str(inputAngle).split(':')
+    return int(angle_array[0])
 
 
 def date_to_string(dateobject):
@@ -52,15 +55,57 @@ class AvailablePass(object):
         self.set_time = self.set_time.astimezone(tz=loc_timezone)
 
     def format_output(self):
-        print(self.name)
-        print('\tRise: {} - Azimuth: {}'.format(self.rise_time, self.rise_azimuth))
-        print('\tMax elevation AZ: {} - Elevation: {}: '.format(self.max_elev_az, self.max_elevation))
-        print('\tSet: {} - Azimuth of {}'.format(self.set_time, self.set_azimuth))
+        formatted_dict = {"sat_name": self.name,
+                          "aos": {
+                              "time": self.rise_time.isoformat(),
+                              "azimuth": angle_to_int(self.rise_azimuth)
+                          },
+                          "max_elevation": {
+                              "time": self.max_elev_time.isoformat(),
+                              "azimuth": angle_to_int(self.max_elev_az),
+                              "elevation": angle_to_int(self.max_elevation)
+                          },
+                          "los": {
+                              "time": self.set_time.isoformat(),
+                              "azimuth": angle_to_int(self.set_azimuth)
+                          }
+                          }
+        return formatted_dict
 
-    def jsonify(self):
-        """Return object as JSON string.  This is typeconversion hell."""
-        todict = vars(self)
-        return json.dumps(todict, indent=1, default=date_to_string)
+
+@falcon.before(hooks.get_sat_names)
+class AvailablePassAPI(object):
+    def on_get(self, req, resp, callsign):
+        loc = SatTrack.fetch_location(callsign)
+        loc_timeslots = TimeSlotHandler.LocationTimeSlots(callsign)
+        loc_timeslots.fetch_timeslots()
+        loc_timeslots.gen_start_times()
+        available_passes = []
+        try:
+            min_elevation = int(req.params['min_elevation'])
+        except KeyError as k:
+            min_elevation = 0
+
+        for pass_time in loc_timeslots.start_datetimes:
+            for sat_name in req.params['sat_list']:
+                sat = SatTrack.fetch_sat_tle(sat_name)
+                sat.compute(loc)
+                original_timezone = pass_time[1].datetime.tzinfo
+                utc_start_time = pass_time[1].astimezone(tz=tz.gettz('UTC'))
+                loc.date = utc_start_time
+                satpass = loc.next_pass(sat)
+                time_diff = abs(satpass[0].datetime() - loc.date.datetime())
+                if time_diff.seconds <= pass_time[2]:
+                    validpass = AvailablePass(sat_name, satpass)
+                    validpass.convert_pass_tz(original_timezone)
+                    loc.date = validpass.max_elev_time.astimezone(tz=tz.gettz('UTC'))
+                    sat.compute(loc)
+                    validpass.max_elev_az = sat.az
+                    # This works, but seems inelegant
+                    if angle_to_int(validpass.max_elevation) >= min_elevation:
+                        available_passes.append(validpass.format_output())
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps(available_passes)
 
 
 if __name__ == '__main__':
@@ -81,17 +126,18 @@ if __name__ == '__main__':
         for sat_name in sat_names:
             sat = SatTrack.fetch_sat_tle(sat_name)
             sat.compute(loc)
-            original_timezone = pass_time[0].datetime.tzinfo
-            utc_start_time = pass_time[0].astimezone(tz=tz.gettz('UTC'))
+            original_timezone = pass_time[1].datetime.tzinfo
+            utc_start_time = pass_time[1].astimezone(tz=tz.gettz('UTC'))
             loc.date = utc_start_time
             satpass = loc.next_pass(sat)
             time_diff = abs(satpass[0].datetime() - loc.date.datetime())
-            if time_diff.seconds <= pass_time[1]:  # TODO - Change to duration. Just figure out scope
-                print('Available starting time: {}'.format(pass_time[0]))
+            if time_diff.seconds <= pass_time[2]:  # TODO - Change to duration. Just figure out scope
+                print('Available starting time: {}'.format(pass_time[1]))
                 validpass = AvailablePass(sat_name, satpass)
                 validpass.convert_pass_tz(original_timezone)
                 available_passes.append(validpass)
                 loc.date = validpass.max_elev_time.astimezone(tz=tz.gettz('UTC'))
                 sat.compute(loc)
                 validpass.max_elev_az = sat.az
-                validpass.format_output()
+                test = validpass.format_output()
+                print(test)

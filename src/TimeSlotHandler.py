@@ -4,6 +4,8 @@ import arrow
 from datetime import timedelta
 from dateutil import tz
 from model import *
+import falcon
+import hooks
 
 # globals
 try:
@@ -54,6 +56,9 @@ iso_day_name = {1: 'Monday',
                 7: 'Sunday'}
 
 
+
+
+
 class TimeSlotObj(object):
     """ This class generates and stores time slots for a specific location"""
     def __init__(self, callsign, days, start_time, duration):
@@ -61,7 +66,8 @@ class TimeSlotObj(object):
         self.days = days
         self.start_time = start_time
         self.duration = duration
-        self.new_timeslot = None
+        self.new_timeslot = False
+        self.deleted = False
 
     def timeslot_exists(self):
         try:
@@ -70,7 +76,7 @@ class TimeSlotObj(object):
                          start_time=self.start_time,
                          duration=self.duration)
             print('Slot already exists')
-        except:
+        except Exception as error_details:
             print('Timeslot does not exist')
             self.new_timeslot = True
 
@@ -83,6 +89,19 @@ class TimeSlotObj(object):
                                     duration=self.duration)
             new_timeslot.save()
 
+    def delete_timeslot(self):
+        self.timeslot_exists()
+        if self.new_timeslot is False:
+            try:
+                delete_query = Timeslot.delete().where(Timeslot.callsign == self.callsign,
+                                                       Timeslot.weekdays == self.days,
+                                                       Timeslot.start_time == self.start_time,
+                                                       Timeslot.duration == self.duration)
+                delete_query.execute()
+                self.deleted = True
+            except Exception as error_details:
+                print(error_details)
+
 
 class LocationTimeSlots(object):
     """Time slots associated with a specific location."""
@@ -94,7 +113,8 @@ class LocationTimeSlots(object):
     def fetch_timeslots(self):
         """Fetch all stored timeslots for a callsign
         Set self.all_timeslots to the output"""
-        self.all_timeslots = Timeslot.select(Timeslot.callsign,
+        self.all_timeslots = Timeslot.select(Timeslot.id,
+                                             Timeslot.callsign,
                                              Timeslot.weekdays,
                                              Timeslot.start_time,
                                              Timeslot.duration).join(Location).where(Location.callsign == self.callsign)
@@ -111,13 +131,80 @@ class LocationTimeSlots(object):
                 if daydiff <= 0:
                     daydiff += 7
                 str_date = '{}T{}'.format(str(today_date + timedelta(days=daydiff)), row.start_time)
-                final_start_dates.add((arrow.get(str_date).replace(tzinfo=tz.gettz(row.callsign.timezone)),
+                final_start_dates.add((row.id, arrow.get(str_date).replace(tzinfo=tz.gettz(row.callsign.timezone)),
                                        row.duration))
         self.start_datetimes = sorted(final_start_dates)
 
     def print_final_times(self):
         for final_date in self.start_datetimes:
             print('{} type {}'.format(final_date, type(final_date)))
+
+
+class TimeSlotAPI(object):
+    @staticmethod
+    def on_get(req, resp, callsign):
+        resp_list = []
+        timeslots = LocationTimeSlots(callsign)
+        timeslots.fetch_timeslots()
+        timeslots.gen_start_times()
+        for row in timeslots.start_datetimes:
+            timedict = {
+                'id': row[0],
+                'date': row[1].isoformat(),
+                'duration': row[2]
+            }
+            resp_list.append(timedict)
+        resp_dict = {
+            'user': callsign,
+            'timeslots': resp_list
+        }
+        resp.body = json.dumps(resp_dict)
+        resp.status = falcon.HTTP_200
+
+    @falcon.before(hooks.validate_type_json)
+    def on_put(self, req, resp, callsign, input_object):
+        resp_dict = {}
+        try:
+            new_timeslot = TimeSlotObj(callsign,
+                                       input_object['days'],
+                                       input_object['start_time'],
+                                       input_object['duration'])
+            new_timeslot.store_timeslot()
+            resp.status = falcon.HTTP_204
+        except TypeError as error_details:
+            resp.status = falcon.HTTP_500
+            resp_dict = {'error': 'Invalid value for property provided',
+                         'details': error_details.args}
+        except KeyError as k:
+            resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
+            resp_dict = {'error': 'Missing Property',
+                         'property name': k.args[0]}
+        resp.body = json.dumps(resp_dict)
+
+    @falcon.before(hooks.validate_type_json)
+    def on_delete(self, req, resp, callsign, input_object):
+        resp_dict = {}
+        try:
+            sent_timeslot = TimeSlotObj(callsign,
+                                        input_object['days'],
+                                        input_object['start_time'],
+                                        input_object['duration'])
+            sent_timeslot.delete_timeslot()
+            if sent_timeslot.deleted is True:
+                resp.status = falcon.HTTP_204
+            else:
+                resp.status = falcon.HTTP_400
+                resp_dict = {'error': 'timeslot does not exist'}
+        except TypeError as error_details:
+            resp.status = falcon.HTTP_500
+            resp_dict = {'error': 'Invalid value for property provided',
+                         'details': error_details.args}
+        except KeyError as k:
+            resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
+            resp_dict = {'error': 'Missing Property',
+                         'property name': k.args[0]}
+        resp.body = json.dumps(resp_dict)
+
 
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
