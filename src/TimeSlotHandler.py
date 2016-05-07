@@ -165,7 +165,7 @@ class TimeSlotAPI(object):
     def on_put(self, req, resp, callsign, input_object):
         resp_dict = {}
         try:
-            new_timeslot = TimeSlotObj(input_object['callsign'],
+            new_timeslot = TimeSlotObj(callsign,
                                        input_object['days'],
                                        input_object['start_time'],
                                        input_object['duration'])
@@ -185,7 +185,7 @@ class TimeSlotAPI(object):
     def on_delete(self, req, resp, callsign, input_object):
         resp_dict = {}
         try:
-            sent_timeslot = TimeSlotObj(input_object['callsign'],
+            sent_timeslot = TimeSlotObj(callsign,
                                         input_object['days'],
                                         input_object['start_time'],
                                         input_object['duration'])
