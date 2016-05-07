@@ -12,24 +12,26 @@ api.add_route('/user/{callsign}', user)
 # PUT  Add or Update a user.
 # Body:
 # {
-#     "lat": ,
-#     "long": ,
-#     "timezone": "America/Boise",
-#     "street_address": null
+#     "lat": ,  # Latitude
+#     "long": , # Longitude
+#     "timezone": , # Any standard name for a timezone, e.g. "America/Denver" US/Eastern or UTC.
+#     "street_address": # USed if you don't send a US Callsign.  A geocode lookup will generate Lat/Lon.
 # }
-# If using a US Callsign,  send lat, long, and street address as null.
-# Otherwise send lat, long, or street_adress
+#
+# If using a US Callsign,  sending lat, long, and street address as null will force a lookup via callook.info.
+# Sending a street address will force a geocode lookup
 #
 # GET  Returns stored data for a callsign.
+
 
 timeslots = TimeSlotHandler.TimeSlotAPI()
 api.add_route('/user/{callsign}/allslots', timeslots)
 # PUT  Add a new availabilty timeslot.
 # Body:
 # {
-#     "days": ,
-#     "start_time": ,
-#     "duration"
+#     "days": ,  # Send a list of the days you are available.
+#     "start_time": ,  #24 our clock, server assumes this is timezone associated with the callsign.
+#     "duration": # Amount of time to check for passes in seconds.
 # }
 # GET
 # Returns an expansion of the next week of time slots.
