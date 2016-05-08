@@ -1,0 +1,14 @@
+body {
+    background-color: #A3A3C3;
+    color: #5C5C3C
+}
+
+div {
+    border-style: solid;
+    border-color: black;
+    border-width: thin;
+}
+
+.title {
+    text-align: center;
+}

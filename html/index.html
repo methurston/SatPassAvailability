@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>N7DFL - Sat Pass Availability</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/basic.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-1">sm</div>
+        <div class="col-sm-10">
+            <h1 class="title">N7DFL Satellite Pass Availability</h1>
+        </div>
+        <div class="col-sm-1">sm</div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4" id="userinput">
+            <h3>Enter User Info</h3>
+            <form>
+                <fieldset class="form-group" id="userinfo">
+                    <input type="text" class="form-control" id="callsign" placeholder="Enter Callsign">
+                    <input type="text" class="form-control" id="timezone" placeholder="Timezone">
+                    <input type="text" class="form-control" id="street_address" placeholder="Street Address">
+                    <input type="text" class="form-control" id="lat" placeholder="Latitude">
+                    <input type="text" class="form-control" id="lon" placeholder="Longitude">
+                    <input type="text" class="form-control" id="elev" placeholder="elevation">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </fieldset>
+            </form>
+        </div>
+        <div class="col-sm-8" id="userinfo">
+            foo
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4" id="slotinput">
+            <h3>Enter Timeslot</h3>
+            <form>
+                <fiedset class="form-group" id="slotinfo">
+                    <select multiple class="form-control" id="days">
+                        <option value="su">Sunday</option>
+                        <option value="m">Monday</option>
+                        <option value="t">Tuesday</option>
+                        <option value="w">Wednesday</option>
+                        <option value="th">Thursday</option>
+                        <option value="f">Friday</option>
+                        <option value="sa">Saturday</option>
+                    </select>
+                    <input type="text" class="form-control" id="start_time" placeholder="Starting Time (24h)">
+                    <input type="text" class="form-control" id="duration" placeholder="Duration (s)">
+                </fiedset>
+            </form>
+    </div>
+        <div class="col-sm-8">
+            <h3>All possible timeslots</h3>
+        </div>
+    </div>
+</body>
+</html>
