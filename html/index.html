@@ -11,6 +11,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
     <!-- Latest compiled JavaScript -->
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="scripts/apiConnector.js"></script>
 </head>
 <body>
 
@@ -25,19 +26,19 @@
     <div class="row">
         <div class="col-sm-4" id="userinput">
             <h3>Enter User Info</h3>
-            <form>
-                <fieldset class="form-group" id="userinfo">
+            <form id="userinput">
+                <fieldset class="form-group" >
                     <input type="text" class="form-control" id="callsign" placeholder="Enter Callsign">
                     <input type="text" class="form-control" id="timezone" placeholder="Timezone">
                     <input type="text" class="form-control" id="street_address" placeholder="Street Address">
                     <input type="text" class="form-control" id="lat" placeholder="Latitude">
                     <input type="text" class="form-control" id="lon" placeholder="Longitude">
                     <input type="text" class="form-control" id="elev" placeholder="elevation">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button class="btn btn-primary" onclick="getUserForm(); return false;">Submit</button>
                 </fieldset>
             </form>
         </div>
-        <div class="col-sm-8" id="userinfo">
+        <div class="col-sm-8" id="storedinfo">
             foo
         </div>
     </div>
