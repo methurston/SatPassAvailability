@@ -90,6 +90,7 @@ class UserAPI(object):
             'elevation': user.elevation,
             'timezone': user.timezone
         }
+        print("called userget")
         resp.body = json.dumps(userdict)
         resp.content_type = 'Application/JSON'
         resp.status = falcon.HTTP_200
