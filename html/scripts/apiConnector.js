@@ -1,22 +1,5 @@
 baseApiEndpoint = "http://localhost:8000/user/"
 
-function old_getUserForm() {
-    userform = document.forms.namedItem("userinput");
-    console.log(userform.elements)
-    userinfo = {
-        "callsign": userform.elements["callsign"].value,
-        "timezone": userform.elements["timezone"].value,
-        "street_address": userform.elements["street_address"].value,
-        "lat": userform.elements["lat"].value,
-        "lon": userform.elements["lon"].value,
-        "elev": userform.elements["elev"].value
-    };
-    console.log(userinfo.callsign);
-    output = document.getElementById("storedinfo");
-    output.innerHTML = userinfo.callsign;
-    return userinfo;
-};
-
 function getUserForm() {
      //var form_input = $("#userinput");
      userinfo = {
@@ -25,17 +8,34 @@ function getUserForm() {
          "street_address": $('#userinput input[id="street_address"]').val(),
          "lat": $('#userinput input[id="lat"]').val(),
          "lon": $('#userinput input[id="lon"]').val(),
-         "elev": $('#userinput input[id="elev"]').val()
+         "elevation": $('#userinput input[id="elevation"]').val()
      }
-     console.log(userinfo)
 
      $('#storedinfo').html(userinfo.callsign + "<br>" + userinfo.timezone)
      return userinfo
 }
 
-function getUserApi(user_info_obj){
-    resp = $.ajax({
-        url: baseApiEndpoint + user_info_obj.callsign,
 
-    })
+function ajaxGetUserApi(user_info_obj){
+    res = $.get({
+            url: baseApiEndpoint + user_info_obj.callsign,
+            type: "GET",
+            context: $("#userinput"),
+            dataType: 'json',
+            timeout: 2000 //2 seconds
+        })
+        .done(function (data){
+            console.log(data);
+            $("#usertitle").html("<h3>" + data.callsign + " User Info</h3>")
+            $( this ).find('input[id="callsign"]').val(data.callsign);
+            $( this ).find('input[id="timezone"]').val(data.timezone);
+            $( this ).find('input[id="street_address"]').val("Not stored");
+            $( this ).find('input[id="lat"]').val(data.lat);
+            $( this ).find('input[id="lon"]').val(data.lon);
+            $( this ).find('input[id="elevation"]').val(data.elevation);
+        })
+        .fail(function(){
+            $("#usertitle").html(user_info_obj.callsign + " not found<br/>Fill in the fields below to store.")
+            $( this ).find('input[id="callsign"]').val(user_info_obj.callsign);
+        })
 }
