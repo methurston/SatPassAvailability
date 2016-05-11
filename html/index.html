@@ -24,8 +24,8 @@
         <div class="col-sm-1">sm</div>
     </div>
     <div class="row">
-        <div class="col-sm-4" id="user_input_divt">
-            <h3>Enter User Info</h3>
+        <div class="col-sm-4" id="user_input_div">
+            <span id="usertitle"><h3>Enter User Info</h3></span>
             <form id="userinput">
                 <fieldset class="form-group" >
                     <input type="text" class="form-control" id="callsign" placeholder="Enter Callsign">
@@ -33,8 +33,9 @@
                     <input type="text" class="form-control" id="street_address" placeholder="Street Address">
                     <input type="text" class="form-control" id="lat" placeholder="Latitude">
                     <input type="text" class="form-control" id="lon" placeholder="Longitude">
-                    <input type="text" class="form-control" id="elev" placeholder="elevation">
-                    <button class="btn btn-primary" onclick="getUserForm(); return false;">Submit</button>
+                    <input type="text" class="form-control" id="elevation" placeholder="elevation">
+                    <button class="btn btn-primary" onclick="ajaxGetUserApi(getUserForm()); return false;">Get User</button>
+                    <button class="btn btn-primary">Store/Update User</button>
                 </fieldset>
             </form>
         </div>
