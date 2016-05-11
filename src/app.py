@@ -3,8 +3,19 @@ import UserManager
 import TimeSlotHandler
 import TleHandler
 import AvailablePasses
+import requests
 
-api = application = falcon.API()
+ALLOWED_ORIGINS = ['http://localhost:8080']
+
+
+class CorsMiddleware(object):
+
+    def process_request(self, request, response):
+        origin = request.get_header('Origin')
+        if origin in ALLOWED_ORIGINS:
+            response.set_header('Access-Control-Allow-Origin', origin)
+
+api = application = falcon.API(middleware=CorsMiddleware())
 TleHandler.UpdateTLE()
 
 user = UserManager.UserAPI()
