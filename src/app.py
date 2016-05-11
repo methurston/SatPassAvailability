@@ -9,6 +9,7 @@ ALLOWED_ORIGINS = ['http://localhost:8080']
 
 
 class CorsMiddleware(object):
+    """stolen from http://hpincket.com/falcon-framework-cors-for-no-access-control-allow-origin.html"""
 
     def process_request(self, request, response):
         origin = request.get_header('Origin')
