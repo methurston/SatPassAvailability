@@ -58,7 +58,7 @@ class User(object):
                             elevation=self.elevation,
                             timezone=self.timezone)
         new_user.save(force_insert=self.new_user)
-        print('User Stored')
+        #print('User Stored')
 
     def user_exist(self):
         """sets new_user to true if it's not in the Database."""
@@ -90,13 +90,43 @@ class UserAPI(object):
             'elevation': user.elevation,
             'timezone': user.timezone
         }
-        print("called userget")
         resp.body = json.dumps(userdict)
         resp.content_type = 'Application/JSON'
         resp.status = falcon.HTTP_200
 
+    # @falcon.before(hooks.validate_type_json)
+    # def on_put(self, req, resp, callsign, input_object):
+    #     resp_dict = {}
+    #     if input_object['lat'] is None and input_object['long'] is None and input_object['street_address'] is None:
+    #         lookup_data = lookup_callsign(callsign)
+    #         if lookup_data['status'] == 'VALID':
+    #             input_object['lat'] = lookup_data['location']['latitude']
+    #             input_object['long'] = lookup_data['location']['longitude']
+    #             resp.status = falcon.HTTP_204
+    #         else:
+    #             resp.status = falcon.HTTP_400
+    #             resp_dict = {'error': 'Invalid Parameters',
+    #                          'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
+    #     try:
+    #         new_user = User(callsign,
+    #                         input_object['lat'],
+    #                         input_object['long'],
+    #                         input_object['timezone'],
+    #                         input_object['street_address'])
+    #         new_user.store_user()
+    #         resp.status = falcon.HTTP_204
+    #     except TypeError as error_details:
+    #         resp.status = falcon.HTTP_500
+    #         resp_dict = {'error': 'Invalid value for property provided',
+    #                      'details': error_details.args}
+    #     except KeyError as k:
+    #         resp.status = falcon.HTTP_400  # This should be 422, pip falcon install doesn't have it.
+    #         resp_dict = {'error': 'Missing Property',
+    #                      'property name': k.args[0]}
+    #     resp.body = json.dumps(resp_dict)
+
     @falcon.before(hooks.validate_type_json)
-    def on_put(self, req, resp, callsign, input_object):
+    def on_post(self, req, resp, callsign, input_object):
         resp_dict = {}
         if input_object['lat'] is None and input_object['long'] is None and input_object['street_address'] is None:
             lookup_data = lookup_callsign(callsign)
@@ -127,6 +157,7 @@ class UserAPI(object):
         resp.body = json.dumps(resp_dict)
 
 
+
 if __name__ == '__main__':
     # test_callsign = config['default_location']['callsign']
     test_callsign = 'N7M'
@@ -143,5 +174,3 @@ if __name__ == '__main__':
         myUser.street_address = input(
             'Callsign of {} was not found, please enter a street address: '.format(test_callsign))
         myUser.store_user()
-
-    print('Added {}'.format(myUser.callsign))

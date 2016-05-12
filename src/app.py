@@ -3,18 +3,25 @@ import UserManager
 import TimeSlotHandler
 import TleHandler
 import AvailablePasses
-import requests
+# import requests
 
 ALLOWED_ORIGINS = ['http://localhost:8080']
+ALLOWED_METHODS = ['GET', 'POST', 'PUT']
+ALLOWED_HEADERS = ['Content-Type']
 
 
 class CorsMiddleware(object):
     """stolen from http://hpincket.com/falcon-framework-cors-for-no-access-control-allow-origin.html"""
 
     def process_request(self, request, response):
+        response.set_header('Access-Control-Allow-Headers', ','.join(ALLOWED_HEADERS))
         origin = request.get_header('Origin')
+        method = request.method
         if origin in ALLOWED_ORIGINS:
             response.set_header('Access-Control-Allow-Origin', origin)
+        if method in ALLOWED_METHODS:
+            response.set_header('Access-Control-Allow-Methods', method)
+
 
 api = application = falcon.API(middleware=CorsMiddleware())
 TleHandler.UpdateTLE()

@@ -10,6 +10,7 @@ def validate_type_json(req, resp, resource, params):
         msg = 'Content must be sent as application/json'
         raise falcon.HTTPUnsupportedMediaType(msg)
     api_input = req.stream.read().decode()
+    print(api_input)
     try:
         input_object = json.loads(api_input)
         params['input_object'] = input_object

@@ -32,10 +32,10 @@
                     <input type="text" class="form-control" id="timezone" placeholder="Timezone">
                     <input type="text" class="form-control" id="street_address" placeholder="Street Address">
                     <input type="text" class="form-control" id="lat" placeholder="Latitude">
-                    <input type="text" class="form-control" id="lon" placeholder="Longitude">
+                    <input type="text" class="form-control" id="long" placeholder="Longitude">
                     <input type="text" class="form-control" id="elevation" placeholder="elevation">
                     <button class="btn btn-primary" onclick="ajaxGetUserApi(getUserForm()); return false;">Get User</button>
-                    <button class="btn btn-primary">Store/Update User</button>
+                    <button class="btn btn-primary" onclick="ajaxPutUserApi(getUserForm()); return false;">Add/Update User</button>
                 </fieldset>
             </form>
         </div>
