@@ -46,11 +46,15 @@ def get_tle_file_age():
        Return: tuple (age, no_sats)
        if no satellites are loaded, no_sats is True"""
     max_age = Satellite.select(fn.Max(Satellite.updateDTS)).scalar()
+
     if max_age is None:
         tle_age = file_age_threshold + 1
         no_sats = True
     else:
-        time_tle_age = dateutil.parser.parse(max_age)
+        if isinstance(max_age, str):  # Postgres returns datetime, sqlite returns string.
+            time_tle_age = dateutil.parser.parse(max_age)
+        else:
+            time_tle_age = dateutil.parser.parse(max_age.isoformat())
         tle_age = (datetime.now() - time_tle_age).days
         no_sats = False
     return tle_age, no_sats
