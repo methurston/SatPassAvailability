@@ -20,7 +20,7 @@ function getUserForm() {
          "long": $('#userinput input[id="long"]').val(),
          "elevation": $('#userinput input[id="elevation"]').val()
      }
-     console.log('street address: ' + userinfo.street_address + '***')
+     //console.log('street address: ' + userinfo.street_address + '***')
 
      $('#storedinfo').html(userinfo.callsign + "<br>" + userinfo.timezone)
      return userinfo
@@ -44,6 +44,7 @@ function ajaxGetUserApi(user_info_obj){
             $( this ).find('input[id="lat"]').val(data.lat);
             $( this ).find('input[id="long"]').val(data.lon);
             $( this ).find('input[id="elevation"]').val(data.elevation);
+            $( this ).find('button[id="getUserBtn"]').prop('disabled', true);
         })
         .fail(function(){
             $("#usertitle").html(user_info_obj.callsign + " not found<br/>Enter a US Callsign and Timezone<br />Click Add/Update to store.")
@@ -53,6 +54,7 @@ function ajaxGetUserApi(user_info_obj){
             $( this ).find('input[id="long"]').val('');
             $( this ).find('input[id="lat"]').val('');
             $( this ).find('input[id="elevation"]').val('');
+            $( this ).find('button[id="getUserBtn"]').prop('disabled', true);
         })
 }
 
@@ -76,8 +78,12 @@ function ajaxPutUserApi(user_info_obj){
                 })
             }).success(function( data ) {
                 ajaxGetUserApi(user_info_obj)
+                $( this ).find('button[id="addUserBtn"]').prop('disabled', true);
+                $( this ).find('button[id="getUserBtn"]').prop('disabled', false);
             }).fail(function (data){
                 console.log(data)
+                $( this ).find('button[id="addUserBtn"]').prop('disabled', false);
+                $( this ).find('button[id="getUserBtn"]').prop('disabled', false);
             })
         }
     }
