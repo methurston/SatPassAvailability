@@ -14,9 +14,15 @@ except ValueError as e:
     print('Invalid JSON: Error was: {}'.format(e))
     sys.exit()
 
-
-db = SqliteDatabase(config['datasource']['filename'])
-
+if config['datasource']['type'] == 'sqlite3':
+    db = SqliteDatabase(config['datasource']['filename'])
+elif config['datasource']['type'] == 'postgres':
+    db = PostgresqlDatabase(
+        config['datasource']['filename'],
+        user=config['datasource']['username'],
+        password= config['datasource']['password'],
+        host=config['datasource']['host']
+    )
 
 class BaseModel(Model):
     class Meta:
