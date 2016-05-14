@@ -12,3 +12,14 @@ div {
 .title {
     text-align: center;
 }
+
+
+.dayLeft {
+    float: left;
+    border-style: none;
+}
+
+.dayRight {
+    float: right;
+    border-style: none;
+}
