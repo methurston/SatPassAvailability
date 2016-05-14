@@ -10,6 +10,10 @@ function emptyStringToNull(input_string) {
     return output_string;
 }
 
+function getUserCallsign () {
+    sign = $("#userinput input[id='callsign']").val();
+    return sign
+} 
 function getUserForm() {
      //var form_input = $("#userinput");
     var userinfo = {
@@ -30,7 +34,6 @@ function getUserForm() {
 function ajaxGetUserApi(user_info_obj) {
     var res = $.get({
         url: baseApiEndpoint + user_info_obj.callsign,
-        type: "GET",
         context: $("#userinput"),
         dataType: 'json',
         timeout: 2000 //2 seconds
@@ -45,6 +48,9 @@ function ajaxGetUserApi(user_info_obj) {
             $(this).find('input[id="long"]').val(data.lon);
             $(this).find('input[id="elevation"]').val(data.elevation);
             $(this).find('button[id="getUserBtn"]').prop('disabled', true);
+            $("#slotinfo").show();
+            $("#slottitle").html("<h3>Enter another availability</h3>");
+            ajaxGetAllAvailability(getUserCallsign());
         })
         .fail(function () {
             $("#usertitle").html(user_info_obj.callsign + " not found<br/>Enter a US Callsign and Timezone<br />Click Add/Update to store.");
@@ -85,4 +91,53 @@ function ajaxPutUserApi(user_info_obj) {
             $(this).find('button[id="getUserBtn"]').prop('disabled', false);
         });
     }
+}
+
+
+function getTimeslotForm() {
+    available_days = new Array()
+    $.each($('#slotinfo input[name="days"]:checked'), function () {
+        available_days.push($(this).val());
+    });
+    var timeinfo = {
+        "days": available_days.toString(),
+        "start_time": $('#slotinfo input[id="start_time"]').val(),
+        "duration": $('#slotinfo input[id="duration"]').val()
+    };
+    return timeinfo;
+}
+
+function ajaxPutTimeslot(callsign, timeslot_info) {
+    finalUrl = baseApiEndpoint + callsign + "/allslots"
+    
+    $.post({
+        url: finalUrl,
+        dataType: "json",
+        contentType: "application/json",
+        timeout: 2000,
+        data: JSON.stringify({
+            "callsign": callsign,
+            "days": timeslot_info.days,
+            "start_time": timeslot_info.start_time,
+            "duration": timeslot_info.duration})
+        }).success(function (data){
+            $("#slottitle").html("<h3>Timeslot stored</h3>")
+            ajaxGetAllAvailability(getUserCallsign());
+        }).fail (function (data){
+            console.log(data);
+        })
+    }
+
+function ajaxGetAllAvailability(callsign) {
+    finalUrl = baseApiEndpoint + callsign + "/allslots"
+    var allslots = $.get({
+        url: finalUrl,
+        context: $("#storedinfo")
+    }).success( function(data){
+        if (data.timeslots.length === 0) {
+            $(this).html("No stored availability slots<BR> enter one below to get started.")
+        } else {
+            $(this).html(JSON.stringify(data));
+        }
+    })
 }

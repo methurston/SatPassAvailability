@@ -46,21 +46,24 @@
     </div>
     <div class="row">
         <div class="col-sm-4" id="slotinput">
-            <h3>Enter Timeslot</h3>
-            <form>
-                <fiedset class="form-group" id="slotinfo">
-                    <select multiple class="form-control" id="days">
-                        <option value="su">Sunday</option>
-                        <option value="m">Monday</option>
-                        <option value="t">Tuesday</option>
-                        <option value="w">Wednesday</option>
-                        <option value="th">Thursday</option>
-                        <option value="f">Friday</option>
-                        <option value="sa">Saturday</option>
-                    </select>
-                    <input type="text" class="form-control" id="start_time" placeholder="Starting Time (24h)">
-                    <input type="text" class="form-control" id="duration" placeholder="Duration (s)">
-                </fiedset>
+            <h3 id="slottitle">Create/get a user to edit slots</h3>
+            <form id="slotinfo" hidden>
+                <fieldset class="form-group">
+                    <div class="dayLeft">
+                        <input type="checkbox" name="days" value="su" />Sunday<br />
+                        <input type="checkbox" name="days" value="m" />Monday<br />
+                        <input type="checkbox" name="days" value="t" />Tuesday<br />
+                        <input type="checkbox" name="days" value="w" />Wednesday
+                    </div>
+                    <div class="dayRight">
+                        <input type="checkbox" name="days" value="th" />Thursday<br />
+                        <input type="checkbox" name="days" value="f" />Friday<br />
+                        <input type="checkbox" name="days" value="sa" />Saturday<br />
+                    </div>
+                    <input type="time" class="form-control" id="start_time" placeholder="Starting Time (24h)">
+                    <input type="number" min="1" class="form-control" id="duration" placeholder="Duration (s)">
+                    <button class="btn btn-primary" id="addSlotBtn" onclick="ajaxPutTimeslot(getUserCallsign(), getTimeslotForm()); return false;">Store Availability</button>
+                </fieldset>
             </form>
     </div>
         <div class="col-sm-8">
