@@ -45,7 +45,7 @@ api.add_route('/user/{callsign}', user)
 
 timeslots = TimeSlotHandler.TimeSlotAPI()
 api.add_route('/user/{callsign}/allslots', timeslots)
-# PUT  Add a new availabilty timeslot.
+# POST  Add a new availabilty timeslot.
 # Body:
 # {
 #     "days": ,  # Send a list of the days you are available.
