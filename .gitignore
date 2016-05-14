@@ -6,3 +6,4 @@ config.json
 *.pyc
 *.renamed
 MTConfig.json
+nohup.out
