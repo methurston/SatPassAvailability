@@ -129,7 +129,7 @@ function ajaxPutTimeslot(callsign, timeslot_info) {
     }
 
 function ajaxGetAllAvailability(callsign) {
-    finalUrl = baseApiEndpoint + callsign + "/allslots"
+    finalUrl = baseApiEndpoint + callsign + "/allslots";
     var allslots = $.get({
         url: finalUrl,
         context: $("#storedinfo")
@@ -142,6 +142,19 @@ function ajaxGetAllAvailability(callsign) {
     })
 }
 
+function ajaxDeleteTimeslot(callsign, id) {
+    finalUrl = baseApiEndpoint + callsign + "/allslots/" + id;
+    areYouSure = confirm("Delete slot with id: " + id +"? This change is permanent." )
+    if (areYouSure) {
+        var deleted = $.ajax({
+            url: finalUrl,
+            type: "DELETE",
+            success: function(result) {
+                alert("Deleted slot with ID=" + id)
+            }
+        })
+        }
+}
 function formatSlot(user_timeslot) {
     var slothtml = "<tr><td>" + user_timeslot.id + "</td>"
     slothtml += "<td>" + user_timeslot.date + "</td>"
