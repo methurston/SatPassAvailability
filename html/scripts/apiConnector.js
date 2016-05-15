@@ -33,7 +33,7 @@ function getUserForm() {
 
 function ajaxGetUserApi(user_info_obj) {
     var res = $.get({
-        url: baseApiEndpoint + user_info_obj.callsign,
+        url: baseApiEndpoint + user_info_obj.callsign.toLocaleUpperCase(),
         context: $("#userinput"),
         dataType: 'json',
         timeout: 2000 //2 seconds
@@ -137,7 +137,27 @@ function ajaxGetAllAvailability(callsign) {
         if (data.timeslots.length === 0) {
             $(this).html("No stored availability slots<BR> enter one below to get started.")
         } else {
-            $(this).html(JSON.stringify(data));
+            $(this).html(formatTimeSlots(data))
         }
     })
+}
+
+function formatSlot(user_timeslot) {
+    var slothtml = "<tr><td>" + user_timeslot.id + "</td>"
+    slothtml += "<td>" + user_timeslot.date + "</td>"
+    slothtml += "<td>" + (user_timeslot.duration / 3600).toFixed(2) + "</td>"
+    slothtml += "<td>DELETE</td></tr>"
+
+    return slothtml
+}
+
+function formatTimeSlots(user_timeslots) {
+    var allslots = user_timeslots.timeslots;
+    var slotshtml = '<table class="table table-striped">';
+    slotshtml += "<th>ID</th><th>Starting date/time</th><th>Duration</th><th>Delete</th>";
+    for (index=0; index < allslots.length; ++index) {
+        slotshtml += formatSlot(allslots[index]);
+    }
+    slotshtml += "</table>";
+    return slotshtml
 }
