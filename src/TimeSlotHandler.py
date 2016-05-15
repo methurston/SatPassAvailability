@@ -161,26 +161,6 @@ class TimeSlotAPI(object):
         resp.body = json.dumps(resp_dict)
         resp.status = falcon.HTTP_200
 
-#    @falcon.before(hooks.validate_type_json)
-#    def on_put(self, req, resp, callsign, input_object):
-#        resp_dict = {}
-#        try:
-#            new_timeslot = TimeSlotObj(callsign,
-#                                       input_object['days'],
-#                                       input_object['start_time'],
-#                                       input_object['duration'])
-#            new_timeslot.store_timeslot()
-#            resp.status = falcon.HTTP_204
-#        except TypeError as error_details:
-#            resp.status = falcon.HTTP_500
-#            resp_dict = {'error': 'Invalid value for property provided',
-#                         'details': error_details.args}
-#        except KeyError as k:
-#            resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
-#            resp_dict = {'error': 'Missing Property',
-#                         'property name': k.args[0]}
-#        resp.body = json.dumps(resp_dict)
-
     @falcon.before(hooks.validate_type_json)
     def on_post(self, req, resp, callsign, input_object):
         resp_dict = {}
