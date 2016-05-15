@@ -55,6 +55,10 @@ api.add_route('/user/{callsign}/allslots', timeslots)
 # GET
 # Returns an expansion of the next week of time slots.
 
+singleslot = TimeSlotHandler.TimeSlotAPI()
+api.add_route('/user/{callsign}/allslots/{reqid}', timeslots)
+# DELETE
+# Deletes a stored timeslot by id.
 
 slotwithpass = AvailablePasses.AvailablePassAPI()
 api.add_route('/user/{callsign}/availablepass', slotwithpass)
