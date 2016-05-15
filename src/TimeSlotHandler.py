@@ -180,16 +180,15 @@ class TimeSlotAPI(object):
             resp_dict = {'error': 'Missing Property',
                          'property name': k.args[0]}
         resp.body = json.dumps(resp_dict)        
-        
-    @falcon.before(hooks.validate_type_json)
-    def on_delete(self, req, resp, callsign, input_object):
+
+    def on_delete(self, resp, callsign, reqid):
         resp_dict = {}
+        print('ReqID={}'.format(reqid))
         try:
-            sent_timeslot = TimeSlotObj(callsign,
-                                        input_object['days'],
-                                        input_object['start_time'],
-                                        input_object['duration'])
-            sent_timeslot.delete_timeslot()
+            sent_timeslot = Timeslot.get(id=reqid)
+            sent_timeslot.delete_instance()
+            sent_timeslot.deleted = True
+
             if sent_timeslot.deleted is True:
                 resp.status = falcon.HTTP_204
             else:
