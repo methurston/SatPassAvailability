@@ -6,7 +6,7 @@ import AvailablePasses
 # import requests
 
 ALLOWED_ORIGINS = ['http://localhost:8080']
-ALLOWED_METHODS = ['GET', 'POST', 'PUT']
+ALLOWED_METHODS = ['GET', 'POST', 'DELETE']
 ALLOWED_HEADERS = ['Content-Type']
 
 
@@ -15,12 +15,14 @@ class CorsMiddleware(object):
 
     def process_request(self, request, response):
         response.set_header('Access-Control-Allow-Headers', ','.join(ALLOWED_HEADERS))
+        response.set_header('Access-Control-Allow-Methods', ','.join(ALLOWED_METHODS))
         origin = request.get_header('Origin')
         method = request.method
         if origin in ALLOWED_ORIGINS:
             response.set_header('Access-Control-Allow-Origin', origin)
-        if method in ALLOWED_METHODS:
-            response.set_header('Access-Control-Allow-Methods', method)
+        # if method in ALLOWED_METHODS:
+        #     print('Method: {}'.format(method))
+        #     response.set_header('Access-Control-Allow-Methods', method)
 
 
 api = application = falcon.API(middleware=CorsMiddleware())
