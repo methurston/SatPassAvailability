@@ -2,6 +2,7 @@ var baseApiEndpoint = "http://localhost:8000/user/";
 
 
 function emptyStringToNull(input_string) {
+    var output_string;
     if (input_string === "") {
         output_string = null;
     } else {
@@ -10,10 +11,11 @@ function emptyStringToNull(input_string) {
     return output_string;
 }
 
-function getUserCallsign () {
-    sign = $("#userinput input[id='callsign']").val();
-    return sign
-} 
+function getUserCallsign() {
+    var sign = $("#userinput input[id='callsign']").val();
+    return sign;
+}
+
 function getUserForm() {
      //var form_input = $("#userinput");
     var userinfo = {
@@ -29,7 +31,6 @@ function getUserForm() {
     $('#storedinfo').html(userinfo.callsign + "<br>" + userinfo.timezone);
     return userinfo;
 }
-
 
 function ajaxGetUserApi(user_info_obj) {
     var res = $.get({
@@ -66,7 +67,7 @@ function ajaxGetUserApi(user_info_obj) {
 
 function ajaxPutUserApi(user_info_obj) {
     if (!$('#userinput input[id="timezone"]').val()) {
-            $('#usertitle').html('Time Zone is mandatory for submission');
+        $('#usertitle').html('Time Zone is mandatory for submission');
     } else {
         var res = $.post({
             url: baseApiEndpoint + user_info_obj.callsign,
@@ -86,16 +87,14 @@ function ajaxPutUserApi(user_info_obj) {
             $(this).find('button[id="addUserBtn"]').prop('disabled', true);
             $(this).find('button[id="getUserBtn"]').prop('disabled', false);
         }).fail(function (data) {
-            console.log(data);
             $(this).find('button[id="addUserBtn"]').prop('disabled', false);
             $(this).find('button[id="getUserBtn"]').prop('disabled', false);
         });
     }
 }
 
-
 function getTimeslotForm() {
-    available_days = new Array()
+    var available_days = [];
     $.each($('#slotinfo input[name="days"]:checked'), function () {
         available_days.push($(this).val());
     });
@@ -104,12 +103,15 @@ function getTimeslotForm() {
         "start_time": $('#slotinfo input[id="start_time"]').val(),
         "duration": $('#slotinfo input[id="duration"]').val()
     };
+    $.each($('#slotinfo input[name="days"]:checked'), function () {
+        available_days.push($(this).val());
+    });
     return timeinfo;
 }
 
 function ajaxPutTimeslot(callsign, timeslot_info) {
-    finalUrl = baseApiEndpoint + callsign + "/allslots"
-    
+    var finalUrl = baseApiEndpoint + callsign + "/allslots";
+    console.log(timeslot_info)
     $.post({
         url: finalUrl,
         dataType: "json",
@@ -119,21 +121,22 @@ function ajaxPutTimeslot(callsign, timeslot_info) {
             "callsign": callsign,
             "days": timeslot_info.days,
             "start_time": timeslot_info.start_time,
-            "duration": timeslot_info.duration})
-        }).success(function (data){
-            $("#slottitle").html("<h3>Timeslot stored</h3>")
-            ajaxGetAllAvailability(getUserCallsign());
-        }).fail (function (data){
-            console.log(data);
+            "duration": timeslot_info.duration
         })
-    }
+    }).success(function (data) {
+        $("#slottitle").html("<h3>Timeslot stored</h3>");
+        ajaxGetAllAvailability(getUserCallsign());
+    }).fail(function (data) {
+        console.log(data);
+    });
+}
 
 function ajaxGetAllAvailability(callsign) {
-    finalUrl = baseApiEndpoint + callsign + "/allslots";
+    var finalUrl = baseApiEndpoint + callsign + "/allslots";
     var allslots = $.get({
         url: finalUrl,
         context: $("#storedinfo")
-    }).success( function(data){
+    }).success( function(data) {
         if (data.timeslots.length === 0) {
             $(this).html("No stored availability slots<BR> enter one below to get started.")
         } else {
@@ -149,28 +152,31 @@ function ajaxDeleteTimeslot(callsign, id) {
         var deleted = $.ajax({
             url: finalUrl,
             type: "DELETE",
-            success: function(result) {
-                alert("Deleted slot with ID=" + id)
+            context: $("#storedinfo"),
+            success: function (result) {
+                alert("Deleted slot with ID=" + id);
+                ajaxGetAllAvailability(callsign);
             }
-        })
-        }
+        });
+    }
 }
-function formatSlot(user_timeslot) {
-    var slothtml = "<tr><td>" + user_timeslot.id + "</td>"
-    slothtml += "<td>" + user_timeslot.date + "</td>"
-    slothtml += "<td>" + (user_timeslot.duration / 3600).toFixed(2) + "</td>"
-    slothtml += "<td>DELETE</td></tr>"
 
-    return slothtml
+function formatSlot(user_timeslot) {
+    var slothtml = "<tr><td>" + user_timeslot.id + "</td>";
+    slothtml += "<td>" + user_timeslot.date + "</td>";
+    slothtml += "<td>" + (user_timeslot.duration / 3600).toFixed(2) + "</td>";
+    slothtml += "<td><p onclick='ajaxDeleteTimeslot(getUserCallsign(),";
+    slothtml += user_timeslot.id + ")'>DELETE</p></td></tr>";
+    return slothtml;
 }
 
 function formatTimeSlots(user_timeslots) {
     var allslots = user_timeslots.timeslots;
-    var slotshtml = '<table class="table table-striped">';
+    var slotshtml = '<table class="table">';
     slotshtml += "<th>ID</th><th>Starting date/time</th><th>Duration</th><th>Delete</th>";
-    for (index=0; index < allslots.length; ++index) {
+    for (index = 0; index < allslots.length; ++index) {
         slotshtml += formatSlot(allslots[index]);
     }
     slotshtml += "</table>";
-    return slotshtml
+    return slotshtml;
 }
