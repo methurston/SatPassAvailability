@@ -179,9 +179,13 @@ class TimeSlotAPI(object):
             resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
             resp_dict = {'error': 'Missing Property',
                          'property name': k.args[0]}
+        except ValueError as v:
+            resp.status = falcon.HTTP_400
+            resp_dict = {'error': 'Invalid value for property provided',
+                         'details': v.args}
         resp.body = json.dumps(resp_dict)        
 
-    def on_delete(self, resp, callsign, reqid):
+    def on_delete(self, req, resp, callsign, reqid):
         resp_dict = {}
         print('ReqID={}'.format(reqid))
         try:
@@ -202,6 +206,9 @@ class TimeSlotAPI(object):
             resp.status = falcon.HTTP_400  # This should probably be 422, but my falcon install doesn't have it.
             resp_dict = {'error': 'Missing Property',
                          'property name': k.args[0]}
+        except TimeslotDoesNotExist:
+            resp.status = falcon.HTTP_404
+            resp_dict = {'error': 'timeslot does not exist'}
         resp.body = json.dumps(resp_dict)
 
 
