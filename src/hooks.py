@@ -25,7 +25,10 @@ def get_sat_names(req, resp, resource, params):
     try:
         sat_name = req.params['satellite']
         if isinstance(sat_name, str):
-            req.params['sat_list'] = [sat_name.upper()]
+            if sat_name.find(',') != -1:
+                req.params['sat_list'] = sat_name.upper().split(',')
+            else:
+                req.params['sat_list'] = [sat_name.upper()]
         elif isinstance(sat_name, list):
             req.params['sat_list'] = [sat.upper() for sat in sat_name]
         else:
