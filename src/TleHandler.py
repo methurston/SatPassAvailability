@@ -5,7 +5,7 @@ from datetime import datetime
 import dateutil.parser
 from model import *
 from peewee import *
-
+import falcon
 
 # Globals
 try:
@@ -89,6 +89,11 @@ def parse_tle_file(tle_file):
     return tle_objects
 
 
+def fetch_sat_name():
+    allsats = Satellite.select(Satellite.name).distinct()
+    return [item.name for item in allsats]
+
+
 def UpdateTLE():
     file_age = get_tle_file_age()
     print('Age of newest record: {}'.format(file_age))
@@ -98,4 +103,13 @@ def UpdateTLE():
         parsed_tle = parse_tle_file(raw_tle)
         for tle in parsed_tle:
             tle.store(file_age[1])
+
+
+class SatHandlerApi(object):
+    @staticmethod
+    def on_get(req, resp):
+        """return distinct list of satellite names."""
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps(fetch_sat_name())
+
 

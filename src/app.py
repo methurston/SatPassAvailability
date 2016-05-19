@@ -70,3 +70,8 @@ api.add_route('/user/{callsign}/availablepass', slotwithpass)
 # min_elevation = Minimum elevation (in degrees) to consider a pass valid.  If this is omitted, any pass over 0 degrees
 # will be returned.
 # Returns any upcoming pass that conincides with the list returned by GETting allslots
+
+allsats = TleHandler.SatHandlerApi()
+api.add_route('/satellites', allsats)
+# GET
+# Returns a distinct list of satellite names in an array
