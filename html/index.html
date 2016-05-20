@@ -12,16 +12,19 @@
     <!-- Latest compiled JavaScript -->
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="scripts/apiConnector.js"></script>
+    <script>window.onload = function () {
+        ajaxFetchAllSats();
+    }</script>
 </head>
 <body>
 
 <div class="container">
     <div class="row">
-        <div class="col-sm-1">sm</div>
+        <div class="col-sm-1"></div>
         <div class="col-sm-10">
             <h1 class="title">N7DFL Satellite Pass Availability</h1>
         </div>
-        <div class="col-sm-1">sm</div>
+        <div class="col-sm-1"></div>
     </div>
     <div class="row">
         <div class="col-sm-4" id="user_input_div">
@@ -68,8 +71,19 @@
             </form>
     </div>
         <div class="col-sm-8">
-            <span id="withpass"><h3>Upcoming passes</h3></span>
-            <div class="div"></div>
+            <span id="withpass" hidden><h3>Upcoming passes for:</h3>
+            <form name="satnames" class="form-inline">
+                <select id="satselect" class="form-control">
+                    <option value="0">Select Satellite</option>
+                </select>
+                <input type="number" min="0" class="form-control" id="min_elevation" placeholder="Mininmum Elevation">
+                <button type="submit" id="Check for Available Passes" onclick='ajaxGetAvailablePasses($("#satselect").val(), $("#min_elevation").val()); return false;' class="btn btn-primary">
+                Get Pass
+                </button>
+            </form>
+                
+            </span>
+            <div class="div" id="availablepass"></div>
         </div>
     </div>
 </body>

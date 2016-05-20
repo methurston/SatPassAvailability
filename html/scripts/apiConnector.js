@@ -51,6 +51,7 @@ function ajaxGetUserApi(user_info_obj) {
             $(this).find('button[id="getUserBtn"]').prop('disabled', true);
             $("#slotinfo").show();
             $("#slottitle").html("<h3>Enter another availability</h3>");
+            $("#withpass").show();
             ajaxGetAllAvailability(getUserCallsign());
         })
         .fail(function () {
@@ -111,7 +112,6 @@ function getTimeslotForm() {
 
 function ajaxPutTimeslot(callsign, timeslot_info) {
     var finalUrl = baseApiEndpoint + callsign + "/allslots";
-    console.log(timeslot_info)
     $.post({
         url: finalUrl,
         dataType: "json",
@@ -161,6 +161,43 @@ function ajaxDeleteTimeslot(callsign, id) {
     }
 }
 
+function ajaxGetAvailablePasses(satname, minelev) {
+    var finalUrl = baseApiEndpoint + getUserCallsign() + "/availablepass"
+    $.get({
+        url: finalUrl,
+        data: {
+            "satellite": satname,
+            "min_elevation": minelev
+        }
+    }).success(function (data) {
+        console.log(data)
+        $("#availablepass").html(formatAvailablePasses(data))
+    })
+}
+
+function formatAvailableSlot(available_pass) {
+    var availhtml = "<tr><td>"+available_pass.sat_name + "</td>";
+    availhtml += "<td>" + available_pass.aos.time + "</td>";
+    availhtml += "<td>" + available_pass.max_elevation.time + "</td>";
+    availhtml += "<td>" + available_pass.los.time + "</td></tr>";
+    availhtml += "<tr><td></td><td>" + available_pass.aos.azimuth + "</td>";
+    availhtml += "<td>AZ: " + available_pass.max_elevation.azimuth;
+    availhtml += " EL: " + available_pass.max_elevation.elevation + "</td>";
+    availhtml += "<td>" + available_pass.los.azimuth + "</td></tr>";
+    return availhtml;
+}
+
+function formatAvailablePasses(all_available) {
+    var allhtml = '<table class="table">';
+    allhtml += "<tr><th>Name</th><th>AOS</th><th>Max Elevation</th><th>LOS</th></tr>";
+    for (index=0; index < all_available.length; ++index) {
+        allhtml += formatAvailableSlot(all_available[index])
+    }
+    allhtml += "</table>";
+    console.log(allhtml)
+    return allhtml;
+}
+    
 function formatSlot(user_timeslot) {
     var slothtml = "<tr><td>" + user_timeslot.id + "</td>";
     slothtml += "<td>" + user_timeslot.date + "</td>";
@@ -173,10 +210,28 @@ function formatSlot(user_timeslot) {
 function formatTimeSlots(user_timeslots) {
     var allslots = user_timeslots.timeslots;
     var slotshtml = '<table class="table">';
-    slotshtml += "<th>ID</th><th>Starting date/time</th><th>Duration</th><th>Delete</th>";
+    slotshtml += "<tr><th>ID</th><th>Starting date/time</th><th>Duration</th><th>Delete</th></tr>";
     for (index = 0; index < allslots.length; ++index) {
         slotshtml += formatSlot(allslots[index]);
     }
     slotshtml += "</table>";
     return slotshtml;
+}
+
+function createSatOption(satname) {
+    var option = '<option value = "' + satname + '">' + satname + "</option>"
+    return option
+}
+
+function ajaxFetchAllSats() {
+    var finalUrl = "http://localhost:8000/satellites";
+    
+    $.get({
+        "url": finalUrl,
+    }).success(function (data) {
+        $.each(data, function(key, value) {
+            $("#satselect").append($("<option>", {value: value})
+                                   .text(value))
+        });
+    })
 }
