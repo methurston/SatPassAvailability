@@ -33,6 +33,11 @@ def get_elevation(latlon):
     elevation = google([latlon['lat'], latlon['lon']], method='elevation')
     return elevation.meters
 
+def get_timezone(latlon):
+    """Use google to get timezone for a lat/lon pair.  This is an extra API call I do not like"""
+    lookuptz = google([latlon['lat'], latlon['lon']], method='timezone')
+    return lookuptz.timeZoneId
+
 
 class User(object):
     def __init__(self, callsign, lat, lon, timezone, street_address=None):
@@ -42,9 +47,10 @@ class User(object):
         self.street_address = street_address
         if self.lat is not None and self.lon is not None:
             self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
+            self.timezone = get_timezone({'lat': self.lat, 'lon': self.lon})
         else:
             self.elevation = None
-        self.timezone = timezone
+        # self.timezone = timezone
         self.new_user = False  # assume it's an existing
 
     def store_user(self):
@@ -58,7 +64,7 @@ class User(object):
                             elevation=self.elevation,
                             timezone=self.timezone)
         new_user.save(force_insert=self.new_user)
-        #print('User Stored')
+        print('User Stored')
 
     def user_exist(self):
         """sets new_user to true if it's not in the Database."""
@@ -74,6 +80,7 @@ class User(object):
         self.lat = address_details.lat
         self.lon = address_details.lng
         self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
+        self.timezone = get_timezone({'lat': self.lat, 'lon': self.lon})
 
 
 class UserAPI(object):
