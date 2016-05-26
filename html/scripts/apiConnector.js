@@ -44,7 +44,7 @@ function ajaxGetUserApi(user_info_obj) {
             $("#usertitle").html("<h3>" + data.callsign + " User Info</h3>");
             $(this).find('input[id="callsign"]').val(data.callsign);
             $(this).find('input[id="timezone"]').val(data.timezone);
-            $(this).find('input[id="street_address"]').val("Not stored");
+            $(this).find('input[id="street_address"]').hide();
             $(this).find('input[id="lat"]').val(data.lat);
             $(this).find('input[id="long"]').val(data.lon);
             $(this).find('input[id="elevation"]').val(data.elevation);
@@ -55,7 +55,7 @@ function ajaxGetUserApi(user_info_obj) {
             ajaxGetAllAvailability(getUserCallsign());
         })
         .fail(function () {
-            $("#usertitle").html(user_info_obj.callsign + " not found<br/>Enter a US Callsign and Timezone<br />Click Add/Update to store.");
+            $("#usertitle").html(user_info_obj.callsign + " not found<br/>Enter a US Callsign or other identifier and a street address<br />Click Add/Update to store.");
             $(this).find('input[id="callsign"]').val(user_info_obj.callsign);
             $(this).find('input[id="timezone"]').val('');
             $(this).find('input[id="street_address"]').val('');
@@ -67,9 +67,6 @@ function ajaxGetUserApi(user_info_obj) {
 }
 
 function ajaxPutUserApi(user_info_obj) {
-    if (!$('#userinput input[id="timezone"]').val()) {
-        $('#usertitle').html('Time Zone is mandatory for submission');
-    } else {
         var res = $.post({
             url: baseApiEndpoint + user_info_obj.callsign,
             dataType: "json",
@@ -92,7 +89,6 @@ function ajaxPutUserApi(user_info_obj) {
             $(this).find('button[id="getUserBtn"]').prop('disabled', false);
         });
     }
-}
 
 function getTimeslotForm() {
     var available_days = [];
@@ -175,6 +171,19 @@ function ajaxGetAvailablePasses(satname, minelev) {
     })
 }
 
+function ajaxFetchAllSats() {
+    var finalUrl = "http://localhost:8000/satellites";
+    
+    $.get({
+        "url": finalUrl,
+    }).success(function (data) {
+        $.each(data, function(key, value) {
+            $("#satselect").append($("<option>", {value: value})
+                                   .text(value))
+        });
+    })
+}
+
 function formatAvailableSlot(available_pass) {
     var availhtml = "<tr><td>"+available_pass.sat_name + "</td>";
     availhtml += "<td>" + available_pass.aos.time + "</td>";
@@ -223,15 +232,12 @@ function createSatOption(satname) {
     return option
 }
 
-function ajaxFetchAllSats() {
-    var finalUrl = "http://localhost:8000/satellites";
-    
-    $.get({
-        "url": finalUrl,
-    }).success(function (data) {
-        $.each(data, function(key, value) {
-            $("#satselect").append($("<option>", {value: value})
-                                   .text(value))
-        });
-    })
+function toggleUpcomingSlots() {
+    if ($("#storedinfo").is(":hidden")) {
+        $("#allheader").html("Click to hide upcoming slots")
+    } else {
+         $("#allheader").html("Click to show upcoming slots")
+    }
+    $("#storedinfo").toggle()
 }
+

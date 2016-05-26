@@ -32,20 +32,31 @@
             <form id="userinput">
                 <fieldset class="form-group" >
                     <input type="text" class="form-control" id="callsign" placeholder="Enter Callsign">
-                    <input type="text" class="form-control" id="timezone" placeholder="Timezone">
+                    <input type="text" class="form-control" id="timezone" placeholder="Timezone" disabled>
                     <input type="text" class="form-control" id="street_address" placeholder="Street Address">
-                    <input type="text" class="form-control" id="lat" placeholder="Latitude">
-                    <input type="text" class="form-control" id="long" placeholder="Longitude">
-                    <input type="text" class="form-control" id="elevation" placeholder="Elevation">
+                    <input type="text" class="form-control" id="lat" placeholder="Latitude" disabled>
+                    <input type="text" class="form-control" id="long" placeholder="Longitude" disabled>
+                    <input type="text" class="form-control" id="elevation" placeholder="Elevation" disabled>
                     <button class="btn btn-primary" id="getUserBtn" onclick="ajaxGetUserApi(getUserForm()); return false;">Get User</button>
                     <button class="btn btn-primary" id="addUserBtn" onclick="ajaxPutUserApi(getUserForm()); return false;">Add/Update User</button>
                     <button class="btn btn-secondary" id="resetUserBtn" type="reset" onclick='$("#getUserBtn").prop("disabled", false)'>Reset</button>
                 </fieldset>
             </form>
         </div>
-        <div class="div" id="allavailability">
-            <span id="availibility"><h3>Upcoming availability slots</h3></span>
-            <div class="col-sm-8" id="storedinfo"></div>
+                <div class="col-sm-8">
+            <span id="withpass" hidden><h3>Upcoming passes for:</h3>
+            <form name="satnames" class="form-inline">
+                <select id="satselect" class="form-control">
+                    <option value="0">Select Satellite</option>
+                </select>
+                <input type="number" min="0" class="form-control" id="min_elevation" placeholder="Mininmum Elevation">
+                <button type="submit" id="Check for Available Passes" onclick='ajaxGetAvailablePasses($("#satselect").val(), $("#min_elevation").val()); return false;' class="btn btn-primary">
+                Get Pass
+                </button>
+            </form>
+                
+            </span>
+            <div class="div" id="availablepass"></div>
         </div>
     </div>
     <div class="row">
@@ -65,25 +76,14 @@
                         <input type="checkbox" name="days" value="sa" />Saturday<br />
                     </div>
                     <input type="time" class="form-control" id="start_time" placeholder="Starting Time (24h)">
-                    <input type="number" min="1" class="form-control" id="duration" placeholder="Duration (s)">
+                    <input type="number" min="1" class="form-control" id="duration" placeholder="Duration (In seconds)">
                     <button class="btn btn-primary" id="addSlotBtn" onclick="ajaxPutTimeslot(getUserCallsign(), getTimeslotForm()); return false;">Store Availability</button>
                 </fieldset>
             </form>
     </div>
-        <div class="col-sm-8">
-            <span id="withpass" hidden><h3>Upcoming passes for:</h3>
-            <form name="satnames" class="form-inline">
-                <select id="satselect" class="form-control">
-                    <option value="0">Select Satellite</option>
-                </select>
-                <input type="number" min="0" class="form-control" id="min_elevation" placeholder="Mininmum Elevation">
-                <button type="submit" id="Check for Available Passes" onclick='ajaxGetAvailablePasses($("#satselect").val(), $("#min_elevation").val()); return false;' class="btn btn-primary">
-                Get Pass
-                </button>
-            </form>
-                
-            </span>
-            <div class="div" id="availablepass"></div>
+        <div class="div" id="allavailability">
+            <div id="availibility" onclick="toggleUpcomingSlots(); return false;"><h3 id="allheader">Click to show upcoming availability slots</h3></div>
+            <div class="col-sm-8" id="storedinfo" hidden></div>
         </div>
     </div>
 </body>
