@@ -95,36 +95,42 @@ function getTimeslotForm() {
     $.each($('#slotinfo input[name="days"]:checked'), function () {
         available_days.push($(this).val());
     });
-    var timeinfo = {
-        "days": available_days.toString(),
-        "start_time": $('#slotinfo input[id="start_time"]').val(),
-        "duration": $('#slotinfo input[id="duration"]').val()
-    };
-    $.each($('#slotinfo input[name="days"]:checked'), function () {
-        available_days.push($(this).val());
-    });
+    var start = $('#slotinfo input[id="start_time"]').val()
+    if (!start.match(/^([01]\d|2[0-3]):?([0-5]\d)$/)) {
+        alert('Start time must be in the format HH:MM');
+    } else {
+        var timeinfo = {
+            "days": available_days.toString(),
+            "start_time": start,
+            "duration": $('#slotinfo input[id="duration"]').val()
+        };
+    }
     return timeinfo;
 }
 
 function ajaxPutTimeslot(callsign, timeslot_info) {
     var finalUrl = baseApiEndpoint + callsign + "/allslots";
-    $.post({
-        url: finalUrl,
-        dataType: "json",
-        contentType: "application/json",
-        timeout: 2000,
-        data: JSON.stringify({
-            "callsign": callsign,
-            "days": timeslot_info.days,
-            "start_time": timeslot_info.start_time,
-            "duration": timeslot_info.duration
-        })
-    }).success(function (data) {
-        $("#slottitle").html("<h3>Timeslot stored</h3>");
-        ajaxGetAllAvailability(getUserCallsign());
-    }).fail(function (data) {
-        console.log(data);
-    });
+    if (timeslot_info) {
+        $.post({
+            url: finalUrl,
+            dataType: "json",
+            contentType: "application/json",
+            timeout: 2000,
+            data: JSON.stringify({
+                "callsign": callsign,
+                "days": timeslot_info.days,
+                "start_time": timeslot_info.start_time,
+                "duration": timeslot_info.duration
+            })
+        }).success(function (data) {
+            $("#slottitle").html("<h3>Timeslot stored</h3>");
+            ajaxGetAllAvailability(getUserCallsign());
+        }).fail(function (data) {
+            console.log(data);
+        });
+        } else {
+            return false;
+        }
 }
 
 function ajaxGetAllAvailability(callsign) {
