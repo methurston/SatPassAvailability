@@ -6,7 +6,7 @@ import falcon
 def validate_type_json(req, resp, resource, params):
     """This function verifys that request is sent as application/json and that the JSON is valid
         Returns an input_object parameter to the calling function"""
-    if req.content_type != 'application/json':
+    if req.content_type.find('application/json') == -1:
         msg = 'Content must be sent as application/json'
         raise falcon.HTTPUnsupportedMediaType(msg)
     api_input = req.stream.read().decode()
