@@ -203,7 +203,7 @@ function formatAvailablePasses(all_available) {
         allhtml += formatAvailableSlot(all_available[index])
     }
     allhtml += "</table>";
-    console.log(allhtml)
+    //console.log(allhtml)
     return allhtml;
 }
     
