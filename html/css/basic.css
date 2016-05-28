@@ -23,3 +23,7 @@ div {
     float: right;
     border-style: none;
 }
+
+.error {
+    color: #FF0000;
+}
