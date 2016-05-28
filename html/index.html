@@ -12,6 +12,7 @@
     <!-- Latest compiled JavaScript -->
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="scripts/apiConnector.js"></script>
+    <script src="scripts/validator.js"></script>
     <script>window.onload = function () {
         ajaxFetchAllSats();
     }</script>
@@ -75,9 +76,11 @@
                         <input type="checkbox" name="days" value="f" />Friday<br />
                         <input type="checkbox" name="days" value="sa" />Saturday<br />
                     </div>
-                    <input type="time" class="form-control" id="start_time" placeholder="Starting Time (24h)">
-                    <input type="number" min="1" class="form-control" id="duration" placeholder="Duration (In seconds)">
-                    <button class="btn btn-primary" id="addSlotBtn" onclick="ajaxPutTimeslot(getUserCallsign(), getTimeslotForm()); return false;">Store Availability</button>
+                    <input type="time" class="form-control" id="start_time" placeholder="Starting Time (24h)" onblur="validateStart(); return false;">
+                    <div id="timeerror" class="error" hidden></div>
+                    <input type="number" min="1" class="form-control" id="duration" placeholder="Duration (In seconds)" onblur="validateDuration(); return false;">
+                    <div id="durationerror" class="error" hidden></div>
+                    <button class="btn btn-primary" id="addSlotBtn" onclick="ajaxPutTimeslot(getUserCallsign(), getTimeslotForm()); return false;" disabled>Store Availability</button>
                 </fieldset>
             </form>
     </div>
