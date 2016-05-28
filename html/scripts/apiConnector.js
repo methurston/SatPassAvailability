@@ -96,15 +96,12 @@ function getTimeslotForm() {
         available_days.push($(this).val());
     });
     var start = $('#slotinfo input[id="start_time"]').val()
-    if (!start.match(/^([01]\d|2[0-3]):?([0-5]\d)$/)) {
-        alert('Start time must be in the format HH:MM');
-    } else {
-        var timeinfo = {
-            "days": available_days.toString(),
-            "start_time": start,
-            "duration": $('#slotinfo input[id="duration"]').val()
-        };
-    }
+    var timeinfo = {
+        "days": available_days.toString(),
+        "start_time": start,
+        "duration": $('#slotinfo input[id="duration"]').val()
+    };
+
     return timeinfo;
 }
 
