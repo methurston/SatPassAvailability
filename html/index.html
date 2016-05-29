@@ -32,7 +32,7 @@
             <span id="usertitle"><h3>Enter User Info</h3></span>
             <form id="userinput">
                 <fieldset class="form-group" >
-                    <input type="text" class="form-control" id="callsign" placeholder="Enter Callsign">
+                    <input type="text" class="form-control" id="callsign" placeholder="Enter Callsign" onblur="this.value = this.value.toLocaleUpperCase();">
                     <input type="text" class="form-control" id="timezone" placeholder="Timezone" disabled>
                     <input type="text" class="form-control" id="street_address" placeholder="Street Address">
                     <input type="text" class="form-control" id="lat" placeholder="Latitude" disabled>
