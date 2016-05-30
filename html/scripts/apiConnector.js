@@ -21,7 +21,7 @@ function formatTimeSlots(user_timeslots) {
         slotshtml = '<table class="table">',
         index = 0;
     slotshtml += "<tr><th>ID</th><th>Starting date/time</th><th>Duration</th><th>Delete</th></tr>";
-    for (index; index < allslots.length; ++index) {
+    for (index; index < allslots.length; index += 1) {
         slotshtml += formatSlot(allslots[index]);
     }
     slotshtml += "</table>";
@@ -46,7 +46,7 @@ function formatAvailablePasses(all_available) {
     var allhtml = '<table class="table">',
         index = 0;
     allhtml += "<tr><th>Name</th><th>AOS</th><th>Max Elevation</th><th>LOS</th></tr>";
-    for (index; index < all_available.length; ++index) {
+    for (index; index < all_available.length; index += 1) {
         allhtml += formatAvailableSlot(all_available[index]);
     }
     allhtml += "</table>";
@@ -123,7 +123,7 @@ function ajaxGetAllAvailability(callsign) {
 function ajaxPutTimeslot(callsign, timeslot_info) {
     "use strict";
     var finalUrl = baseApiEndpoint + callsign + "/allslots";
-    console.log(timeslot_info.days);
+    //console.log(timeslot_info.days);
     if (timeslot_info) {
         $.post({
             url: finalUrl,
@@ -176,7 +176,7 @@ function ajaxGetAvailablePasses(satname, minelev) {
             "min_elevation": minelev
         }
     }).success(function (data) {
-        console.log(data);
+        //console.log(data);
         $("#availablepass").html(formatAvailablePasses(data));
     });
 }
@@ -204,7 +204,7 @@ function ajaxGetUserApi(user_info_obj) {
         timeout: 5000 //5 seconds
     })
         .done(function (data) {
-            console.log(data);
+            // console.log(data);
             $("#usertitle").html("<h3>" + data.callsign + " User Info</h3>");
             $(this).find('input[id="callsign"]').val(data.callsign);
             $(this).find('input[id="timezone"]').val(data.timezone);
