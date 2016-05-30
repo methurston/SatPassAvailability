@@ -129,7 +129,7 @@ function ajaxPutTimeslot(callsign, timeslot_info) {
             url: finalUrl,
             dataType: "json",
             contentType: "application/json",
-            timeout: 2000,
+            timeout: 5000,
             data: JSON.stringify({
                 "callsign": callsign,
                 "days": timeslot_info.days,
@@ -201,7 +201,7 @@ function ajaxGetUserApi(user_info_obj) {
         url: baseApiEndpoint + user_info_obj.callsign.toLocaleUpperCase(),
         context: $("#userinput"),
         dataType: 'json',
-        timeout: 2000 //2 seconds
+        timeout: 5000 //5 seconds
     })
         .done(function (data) {
             console.log(data);
@@ -236,7 +236,7 @@ function ajaxPutUserApi(user_info_obj) {
         url: baseApiEndpoint + user_info_obj.callsign,
         dataType: "json",
         contentType: "application/json",
-        timeout: 2000,
+        timeout: 5000,
         data: JSON.stringify({
             "callsign": emptyStringToNull($('#userinput input[id="callsign"]').val()),
             "timezone": emptyStringToNull($('#userinput input[id="timezone"]').val()),
