@@ -1,4 +1,8 @@
+/*jslint browser: true*/
+/*global $, jQuery, alert, console, confirm*/
+
 function validateStart() {
+    "use strict";
     var start = $('#slotinfo input[id="start_time"]').val();
     if (!start.match(/^([01]\d|2[0-3]):?([0-5]\d)$/)) {
         $('#slotinput div[id=timeerror]').html("Time must in 24 hour format (HH:MM)");
@@ -11,6 +15,7 @@ function validateStart() {
 }
 
 function validateDuration() {
+    "use strict";
     var duration = $('#slotinfo input[id="duration"]').val();
     if (!Number(duration)) {
         $('#slotinput div[id=durationerror]').html("Duration must be a number of seconds (3600=1 hour)");
