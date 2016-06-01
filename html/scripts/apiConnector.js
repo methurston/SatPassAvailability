@@ -148,7 +148,6 @@ function ajaxPutTimeslot(callsign, timeslot_info) {
 }
 
 
-
 function ajaxDeleteTimeslot(callsign, id) {
     "use strict";
     var finalUrl = baseApiEndpoint + callsign + "/allslots/" + id,
