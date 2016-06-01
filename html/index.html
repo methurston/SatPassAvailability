@@ -13,6 +13,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="scripts/apiConnector.js"></script>
     <script src="scripts/validator.js"></script>
+    <script src="scripts/formatters.js"
     <script>window.onload = function () {
         ajaxFetchAllSats();
     }</script>
@@ -40,7 +41,7 @@
                     <input type="text" class="form-control" id="elevation" placeholder="Elevation" disabled>
                     <button class="btn btn-primary" id="getUserBtn" onclick="ajaxGetUserApi(getUserForm()); return false;">Get User</button>
                     <button class="btn btn-primary" id="addUserBtn" onclick="ajaxPutUserApi(getUserForm()); return false;">Add/Update User</button>
-                    <button class="btn btn-secondary" id="resetUserBtn" type="reset" onclick='$("#getUserBtn").prop("disabled", false)'>Reset</button>
+                    <button class="btn btn-secondary" id="resetUserBtn" type="reset" onclick='resetAll()'>Reset</button>
                 </fieldset>
             </form>
         </div>
