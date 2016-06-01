@@ -90,7 +90,7 @@ def parse_tle_file(tle_file):
 
 
 def fetch_sat_name():
-    allsats = Satellite.select(Satellite.name).distinct()
+    allsats = Satellite.select(Satellite.name).distinct().order_by(Satellite.name)
     return [item.name for item in allsats]
 
 
