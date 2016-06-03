@@ -40,7 +40,7 @@ def get_timezone(latlon):
 
 
 class User(object):
-    def __init__(self, callsign, lat, lon, timezone, street_address=None):
+    def __init__(self, callsign, lat, lon, timezone, street_address=None, grid = None):
         self.callsign = callsign
         self.lat = lat
         self.lon = lon
@@ -62,7 +62,8 @@ class User(object):
                             lat=self.lat,
                             lon=self.lon,
                             elevation=self.elevation,
-                            timezone=self.timezone)
+                            timezone=self.timezone,
+                            gridsquare=self.grid)
         new_user.save(force_insert=self.new_user)
         print('User Stored')
 
@@ -81,6 +82,27 @@ class User(object):
         self.lon = address_details.lng
         self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
         self.timezone = get_timezone({'lat': self.lat, 'lon': self.lon})
+
+    def set_grid_square(self):
+        adj_lon = self.lon + 180
+        adj_lat = self.lat + 90
+        grid_sq = ''
+        grid_lon_sq = upper[int(adj_lon//20)]
+        grid_lat_sq = upper[int(adj_lat//10)]
+
+        grid_sq += grid_lon_sq + grid_lat_sq
+        grid_lon_field = str(int(adj_lon/2)%10)
+        grid_lat_field = str(int(adj_lat%10))
+        grid_sq += grid_lon_field + grid_lat_field
+
+
+        adj_lat_remainder = (adj_lat - int(adj_lat)) * 60
+        adj_lon_remainder = ((adj_lon) - int(adj_lon/2) * 2) * 60
+        grid_lat_subsq = lower[int(adj_lat_remainder/2.5)]
+        grid_lon_subsq = lower[int(adj_lon_remainder/5)]
+
+        grid_sq += grid_lon_subsq + grid_lat_subsq
+        self.grid = grid_sq
 
 
 class UserAPI(object):
@@ -101,37 +123,6 @@ class UserAPI(object):
         resp.content_type = 'Application/JSON'
         resp.status = falcon.HTTP_200
 
-    # @falcon.before(hooks.validate_type_json)
-    # def on_put(self, req, resp, callsign, input_object):
-    #     resp_dict = {}
-    #     if input_object['lat'] is None and input_object['long'] is None and input_object['street_address'] is None:
-    #         lookup_data = lookup_callsign(callsign)
-    #         if lookup_data['status'] == 'VALID':
-    #             input_object['lat'] = lookup_data['location']['latitude']
-    #             input_object['long'] = lookup_data['location']['longitude']
-    #             resp.status = falcon.HTTP_204
-    #         else:
-    #             resp.status = falcon.HTTP_400
-    #             resp_dict = {'error': 'Invalid Parameters',
-    #                          'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
-    #     try:
-    #         new_user = User(callsign,
-    #                         input_object['lat'],
-    #                         input_object['long'],
-    #                         input_object['timezone'],
-    #                         input_object['street_address'])
-    #         new_user.store_user()
-    #         resp.status = falcon.HTTP_204
-    #     except TypeError as error_details:
-    #         resp.status = falcon.HTTP_500
-    #         resp_dict = {'error': 'Invalid value for property provided',
-    #                      'details': error_details.args}
-    #     except KeyError as k:
-    #         resp.status = falcon.HTTP_400  # This should be 422, pip falcon install doesn't have it.
-    #         resp_dict = {'error': 'Missing Property',
-    #                      'property name': k.args[0]}
-    #     resp.body = json.dumps(resp_dict)
-
     @falcon.before(hooks.validate_type_json)
     def on_post(self, req, resp, callsign, input_object):
         resp_dict = {}
@@ -140,6 +131,7 @@ class UserAPI(object):
             if lookup_data['status'] == 'VALID':
                 input_object['lat'] = lookup_data['location']['latitude']
                 input_object['long'] = lookup_data['location']['longitude']
+                input_object['grid'] = lookup_data['location']['gridsquare']
                 resp.status = falcon.HTTP_204
             else:
                 resp.status = falcon.HTTP_400
@@ -150,7 +142,8 @@ class UserAPI(object):
                             input_object['lat'],
                             input_object['long'],
                             input_object['timezone'],
-                            input_object['street_address'])
+                            input_object['street_address'],
+                            input_object['grid'])
             new_user.store_user()
             resp.status = falcon.HTTP_204
         except TypeError as error_details:

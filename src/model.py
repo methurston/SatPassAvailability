@@ -42,6 +42,7 @@ class Location(BaseModel):
     lon = FloatField()
     elevation = IntegerField()
     timezone = CharField()
+    gridsquare = CharField()
 
 
 class Timeslot(BaseModel):
