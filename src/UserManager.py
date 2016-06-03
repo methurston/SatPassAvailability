@@ -40,11 +40,12 @@ def get_timezone(latlon):
 
 
 class User(object):
-    def __init__(self, callsign, lat, lon, timezone, street_address=None, grid = None):
+    def __init__(self, callsign, lat, lon, timezone, street_address=None, grid=None):
         self.callsign = callsign
         self.lat = lat
         self.lon = lon
         self.street_address = street_address
+        self.grid = grid
         if self.lat is not None and self.lon is not None:
             self.elevation = get_elevation({'lat': self.lat, 'lon': self.lon})
             self.timezone = get_timezone({'lat': self.lat, 'lon': self.lon})
@@ -57,6 +58,7 @@ class User(object):
         self.user_exist()
         if self.lat is None or self.lon is None or self.elevation is None:
             self.set_geo_stats()
+            self.set_grid_square()
 
         new_user = Location(callsign=self.callsign,
                             lat=self.lat,
@@ -84,6 +86,8 @@ class User(object):
         self.timezone = get_timezone({'lat': self.lat, 'lon': self.lon})
 
     def set_grid_square(self):
+        upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        lower = upper.lower()
         adj_lon = self.lon + 180
         adj_lat = self.lat + 90
         grid_sq = ''
@@ -117,7 +121,8 @@ class UserAPI(object):
             'lat': user.lat,
             'lon': user.lon,
             'elevation': user.elevation,
-            'timezone': user.timezone
+            'timezone': user.timezone,
+            'gridsquare': user.gridsquare
         }
         resp.body = json.dumps(userdict)
         resp.content_type = 'Application/JSON'
@@ -136,7 +141,7 @@ class UserAPI(object):
             else:
                 resp.status = falcon.HTTP_400
                 resp_dict = {'error': 'Invalid Parameters',
-                             'details': 'For Non US Callsigns, lat and long or street_address must be provided'}
+                             'details': 'For Non US Callsigns street_address must be provided'}
         try:
             new_user = User(callsign,
                             input_object['lat'],
@@ -159,7 +164,6 @@ class UserAPI(object):
 
 
 if __name__ == '__main__':
-    # test_callsign = config['default_location']['callsign']
     test_callsign = 'N7M'
     test_timezone = config['default_location']['timezone']
     fullLoc = lookup_callsign(test_callsign)

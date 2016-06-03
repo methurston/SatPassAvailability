@@ -163,6 +163,7 @@ function ajaxGetUserApi(user_info_obj) {
             $(this).find('input[id="long"]').val(data.lon);
             $(this).find('input[id="elevation"]').val(data.elevation);
             $(this).find('button[id="getUserBtn"]').prop('disabled', true);
+            $(this).find('input[id="gridsquare"]').val(data.gridsquare);
             $("#slotinfo").show();
             $("#slottitle").html("<h3>Enter another availability</h3>");
             $("#withpass").show();
@@ -193,7 +194,8 @@ function ajaxPutUserApi(user_info_obj) {
             "street_address": emptyStringToNull($('#userinput input[id="street_address"]').val()),
             "lat": emptyStringToNull($('#userinput input[id="lat"]').val()),
             "long": emptyStringToNull($('#userinput input[id="long"]').val()),
-            "elevation": emptyStringToNull($('#userinput input[id="elevation"]').val())
+            "elevation": emptyStringToNull($('#userinput input[id="elevation"]').val()),
+            "grid": null
         })
     }).success(function (data) {
         ajaxGetUserApi(user_info_obj);
