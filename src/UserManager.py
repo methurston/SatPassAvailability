@@ -33,6 +33,7 @@ def get_elevation(latlon):
     elevation = google([latlon['lat'], latlon['lon']], method='elevation')
     return elevation.meters
 
+
 def get_timezone(latlon):
     """Use google to get timezone for a lat/lon pair.  This is an extra API call I do not like"""
     lookuptz = google([latlon['lat'], latlon['lon']], method='timezone')
@@ -95,10 +96,9 @@ class User(object):
         grid_lat_sq = upper[int(adj_lat//10)]
 
         grid_sq += grid_lon_sq + grid_lat_sq
-        grid_lon_field = str(int(adj_lon/2)%10)
-        grid_lat_field = str(int(adj_lat%10))
+        grid_lon_field = str(int(adj_lon/2) % 10)
+        grid_lat_field = str(int(adj_lat % 10))
         grid_sq += grid_lon_field + grid_lat_field
-
 
         adj_lat_remainder = (adj_lat - int(adj_lat)) * 60
         adj_lon_remainder = ((adj_lon) - int(adj_lon/2) * 2) * 60
@@ -160,7 +160,6 @@ class UserAPI(object):
             resp_dict = {'error': 'Missing Property',
                          'property name': k.args[0]}
         resp.body = json.dumps(resp_dict)
-
 
 
 if __name__ == '__main__':

@@ -56,9 +56,6 @@ iso_day_name = {1: 'Monday',
                 7: 'Sunday'}
 
 
-
-
-
 class TimeSlotObj(object):
     """ This class generates and stores time slots for a specific location"""
     def __init__(self, callsign, days, start_time, duration):

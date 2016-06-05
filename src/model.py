@@ -20,9 +20,10 @@ elif config['datasource']['type'] == 'postgres':
     db = PostgresqlDatabase(
         config['datasource']['filename'],
         user=config['datasource']['username'],
-        password= config['datasource']['password'],
+        password=config['datasource']['password'],
         host=config['datasource']['host']
     )
+
 
 class BaseModel(Model):
     class Meta:
