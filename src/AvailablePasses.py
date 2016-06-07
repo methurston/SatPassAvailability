@@ -105,7 +105,7 @@ class AvailablePassAPI(object):
                     if angle_to_int(validpass.max_elevation) >= min_elevation:
                         available_passes.append(validpass.format_output())
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps(available_passes)
+        resp.body = json.dumps(sorted(available_passes, key=lambda t: t['aos']['time']))
 
 
 if __name__ == '__main__':
