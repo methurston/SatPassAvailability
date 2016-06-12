@@ -1,6 +1,6 @@
 body {
-    background-color: #797993;
-    color: #152e48;
+    background-color: #062F4F;
+    color: #e0dcdc;
 }
 
 div {
@@ -12,7 +12,6 @@ div {
 .title {
     text-align: center;
 }
-
 
 .dayLeft {
     float: left;

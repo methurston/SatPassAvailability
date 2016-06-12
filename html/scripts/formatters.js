@@ -13,10 +13,28 @@ function formatSlot(user_timeslot) {
     return slothtml;
 }
 
+function formatTime(isotimestring) {
+    "use strict";
+    var weekday = new Array(7);
+    weekday[0] = "Sunday";
+    weekday[1] = "Monday";
+    weekday[2] = "Tuesday";
+    weekday[3] = "Wednesday";
+    weekday[4] = "Thursday";
+    weekday[5] = "Friday";
+    weekday[6] = "Saturday";
+    var jsDate = new Date(isotimestring),
+        datestring = weekday[jsDate.getDay()] + " " + (jsDate.getMonth() + 1) + "/" + jsDate.getDate() + "/" + jsDate.getFullYear();
+    datestring += " " + jsDate.getHours() + ":" + jsDate.getMinutes() + ":" + jsDate.getSeconds();
+    return datestring;
+    
+    
+}
+
 function formatTimeSlots(user_timeslots) {
     "use strict";
     var allslots = user_timeslots.timeslots,
-        slotshtml = '<table class="table">',
+        slotshtml = '<table class="table table-sm">',
         index = 0;
     slotshtml += "<tr><th>ID</th><th>Starting date/time</th><th>Duration</th><th>Delete</th></tr>";
     for (index; index < allslots.length; index += 1) {
@@ -29,13 +47,13 @@ function formatTimeSlots(user_timeslots) {
 function formatAvailableSlot(available_pass) {
     "use strict";
     var availhtml = "<tr><td>" + available_pass.sat_name + "</td>";
-    availhtml += "<td>" + available_pass.aos.time + "</td>";
-    availhtml += "<td>" + available_pass.max_elevation.time + "</td>";
-    availhtml += "<td>" + available_pass.los.time + "</td></tr>";
-    availhtml += "<tr><td></td><td>" + available_pass.aos.azimuth + "</td>";
+    availhtml += "<td>" + formatTime(available_pass.aos.time) + "</td>";
+    availhtml += "<td>" + formatTime(available_pass.max_elevation.time) + "</td>";
+    availhtml += "<td>" + formatTime(available_pass.los.time) + "</td></tr>";
+    availhtml += "<tr><td></td><td>AZ: " + available_pass.aos.azimuth + "</td>";
     availhtml += "<td>AZ: " + available_pass.max_elevation.azimuth;
     availhtml += " EL: " + available_pass.max_elevation.elevation + "</td>";
-    availhtml += "<td>" + available_pass.los.azimuth + "</td></tr>";
+    availhtml += "<td>AZ: " + available_pass.los.azimuth + "</td></tr>";
     return availhtml;
 }
 
