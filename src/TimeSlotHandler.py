@@ -120,13 +120,20 @@ class LocationTimeSlots(object):
     def gen_start_times(self):
         """take the starting time, combine with days, return an array of date time stamps"""
         final_start_dates = set()  # This allows us to toss out duplicates.
-        today_int = arrow.now().isoweekday()
-        today_date = arrow.now().date()
+        runtime = arrow.now()
+        today_int = runtime.isoweekday()
+        today_date = runtime.date()
+        now_hour = arrow.now().hour
         for row in self.all_timeslots:
             for day in row.weekdays.split(','):
                 int_day = daymap[day.lower().strip('. ')]
                 daydiff = int_day - today_int
-                if daydiff < 0:
+                if daydiff == 0 and int(row.start_time[0:2]) > now_hour:
+                    # Check to see if the starting hour is before or after the current hour.
+                    startday = 0
+                else:
+                    startday = 1
+                if daydiff < startday:
                     daydiff += 7
                 str_date = '{}T{}'.format(str(today_date + timedelta(days=daydiff)), row.start_time)
                 final_start_dates.add((row.id, arrow.get(str_date).replace(tzinfo=tz.gettz(row.callsign.timezone)),
@@ -214,7 +221,7 @@ if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
     example_slot = TimeSlotObj(test_callsign,
                                'M,T,W,Th,F, Sa, Su',
-                               '12:00',
+                               '23:00',
                                '3600')
     example_slot.store_timeslot()
     location_slots = LocationTimeSlots(example_slot.callsign)
