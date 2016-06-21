@@ -4,6 +4,7 @@ import arrow
 from datetime import timedelta
 from dateutil import tz
 from model import *
+# import json
 import falcon
 import hooks
 
@@ -125,7 +126,7 @@ class LocationTimeSlots(object):
             for day in row.weekdays.split(','):
                 int_day = daymap[day.lower().strip('. ')]
                 daydiff = int_day - today_int
-                if daydiff <= 0:
+                if daydiff < 0:
                     daydiff += 7
                 str_date = '{}T{}'.format(str(today_date + timedelta(days=daydiff)), row.start_time)
                 final_start_dates.add((row.id, arrow.get(str_date).replace(tzinfo=tz.gettz(row.callsign.timezone)),
@@ -212,7 +213,7 @@ class TimeSlotAPI(object):
 if __name__ == '__main__':
     test_callsign = config['default_location']['callsign']
     example_slot = TimeSlotObj(test_callsign,
-                               'M,T,W,Th,F',
+                               'M,T,W,Th,F, Sa, Su',
                                '12:00',
                                '3600')
     example_slot.store_timeslot()
