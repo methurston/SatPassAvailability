@@ -3,7 +3,7 @@ click==6.6
 decorator==4.0.9
 falcon==0.3.0
 geocoder==1.11.1
-gunicorn==19.4.5
+gunicorn==19.7.1
 peewee==2.8.0
 pyephem==3.7.6.0
 python-dateutil==2.5.2

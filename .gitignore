@@ -7,3 +7,7 @@ config.json*
 *.renamed
 MTConfig.json
 nohup.out
+#output files
+output.txt
+gunicornout.txt
+.DS_Store
