@@ -4,7 +4,8 @@ import unittest
 import requests
 import time
 import json
-from pprint import pprint
+import os
+
 
 workingdir = '../'
 host = '127.0.0.1'
@@ -12,6 +13,7 @@ port = '8181'
 
 
 class SatelliteTest(unittest.TestCase):
+    """Verify the response from the /satellites endpoint"""
     def setUp(self):
         self.response = requests.get('http://{}:{}/satellites'.format(host, port))
 
@@ -19,6 +21,10 @@ class SatelliteTest(unittest.TestCase):
         """ensure the response is a JSON array"""
         content = json.loads(self.response.content)
         self.assertIsInstance(content, list)
+
+    def testOKstatus(self):
+        """Verify 200OK is returned"""
+        self.assertEqual(self.response.status_code, 200)
 
     def testResponseLength(self):
         """verify response is not 0 length"""
@@ -42,23 +48,127 @@ class SatelliteTest(unittest.TestCase):
 
     def tearDown(self):
         pass
-        # self.process.kill()
-        # self.output.close()
+
+
+class UserTests(unittest.TestCase):
+    """Validate put and get methods on the /user endpoint
+    User is an object with the keys:
+            'lat': None,
+            'long': None,
+            'callsign': 'test',
+            'street_address': '404 S 8th st. Boise, Idaho',
+            'timezone': 'America/Denver',
+            'grid': 'DN13'
+    """
+
+    def setUp(self):
+        self.endpoint = 'http://{}:{}/user/'.format(host, port)
+
+    def tearDown(self):
+        pass
+
+    def testMissingUser(self):
+        """Verify when a bad user name is provided, nothing is returned"""
+        response = requests.get('{}baduser'.format(self.endpoint, port))
+        self.assertEqual(response.status_code, 404)
+
+    def testCreateGoodUser(self):
+        user = {
+            'lat': None,
+            'long': None,
+            'callsign': 'test',
+            'street_address': '404 S 8th st. Boise, Idaho',
+            'timezone': 'America/Denver',
+            'grid': 'DN13'
+        }
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        self.assertEqual(response.status_code, 204)
+
+    def testMissingLat(self):
+        """Verify correct key is returned when missing lat"""
+        user = {
+            'callsign': 'test',
+            'long': -116.206325,
+            'elevation': 555,
+            'timezone': 'America/Denver',
+            'grid': 'DN13'
+        }
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        message = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(message.get('error'), "Missing Property")
+        self.assertEqual(message.get('property name'), "lat")
+
+    def testMissingLong(self):
+        """Verify correct key is returned in error payload when long is missing"""
+        user = {
+                'callsign': 'test',
+                'lat': 43.612988,
+                'elevation': 555,
+                'timezone': 'America/Denver',
+                'grid': 'DN13'
+            }
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        message = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(message.get('error'), "Missing Property")
+        self.assertEqual(message.get('property name'), "long")
+
+    def testMissingElevation(self):
+        """Verify update is successful when elevation is missing"""
+        user = {
+            'callsign': 'test',
+            'lat': 43.612988,
+            'long': -116.206325,
+            'street_address': '404 S 8th St. Boise, ID 83702',
+            'timezone': 'America/Denver',
+            'grid': 'DN13'
+        }
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        self.assertEqual(response.status_code, 204)
+
+    def testMissingStreetAddress(self):
+        """Verify correct key is returned in error payload when street address is missing"""
+        user = {
+            'callsign': 'test',
+            'lat': 43.612988,
+            'long': -116.206325,
+            'elevation': 555,
+            'timezone': 'America/Denver',
+            'grid': 'DN13'
+        }
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        message = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(message.get('error'), "Missing Property")
+        self.assertEqual(message.get('property name'), "street_address")
 
 
 if __name__ == '__main__':
     with open('output.txt', 'w') as output:
+        gunoutput = 'tests/gunicornout.txt'
         cmd = ['gunicorn',
                '-b', '{}:{}'.format(host, port),
-               '--error-logfile', 'tests/gunicornout.txt',
+               '--error-logfile', gunoutput,
                '--capture-output',
                'app']
         print('Starting the app')
         process = subprocess.Popen(cmd, cwd=workingdir, stdout=output)
         time.sleep(5)
+        results = {}
         print('Running satellite endpoint tests')
         satSuite = unittest.TestLoader().loadTestsFromTestCase(SatelliteTest)
-        foo = unittest.TextTestRunner(verbosity=0).run(satSuite)
+        results['satellites'] = unittest.TextTestRunner(verbosity=0).run(satSuite)
+        print('Running user endpoint tests')
+        userSuite = unittest.TestLoader().loadTestsFromTestCase(UserTests)
+        results['user'] = unittest.TextTestRunner(verbosity=0).run(userSuite)
+        failingsuites = [key for key in results.keys() if len(results[key].failures) != 0]
+        if len(failingsuites) == 0:
+            print('All suites pass')
+            print('Cleaning up')
+            os.remove(gunoutput.split('/')[1])
+        else:
+            print('{} suite(s) failed'.format(failingsuites))
         print('Shutting Down')
         process.terminate()
         process.wait()

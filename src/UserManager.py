@@ -131,7 +131,7 @@ class UserAPI(object):
     @falcon.before(hooks.validate_type_json)
     def on_post(self, req, resp, callsign, input_object):
         resp_dict = {}
-        if input_object['lat'] is None and input_object['long'] is None and input_object['street_address'] is None:
+        if input_object.get('lat', None) is None and input_object.get('long', None) is None and input_object.get('street_address', None) is None:
             lookup_data = lookup_callsign(callsign)
             if lookup_data['status'] == 'VALID':
                 input_object['lat'] = lookup_data['location']['latitude']

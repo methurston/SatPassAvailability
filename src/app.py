@@ -30,13 +30,15 @@ TleHandler.UpdateTLE()
 
 user = UserManager.UserAPI()
 api.add_route('/user/{callsign}', user)
-# PUT  Add or Update a user.
+# POST  Add or Update a user.
 # Body:
 # {
-#     "lat": ,  # Latitude
-#     "long": , # Longitude
-#     "timezone": , # Any standard name for a timezone, e.g. "America/Denver" US/Eastern or UTC.
-#     "street_address": # USed if you don't send a US Callsign.  A geocode lookup will generate Lat/Lon.
+# 'callsign': user.callsign,
+# 'lat': user.lat,
+# 'lon': user.lon,
+# 'elevation': user.elevation,
+# 'timezone': user.timezone,
+# 'gridsquare': user.gridsquare
 # }
 #
 # If using a US Callsign,  sending lat, long, and street address as null will force a lookup via callook.info.
