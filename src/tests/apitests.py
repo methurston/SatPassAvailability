@@ -84,6 +84,14 @@ class UserTests(unittest.TestCase):
         response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
         self.assertEqual(response.status_code, 204)
 
+    def testExpectedKeys(self):
+        """test to ensure GET 'test' user returns expected keys.  Note that street_address is only used to calculate lat/long and not stored or
+            returned"""
+        response = requests.get('{}{}'.format(self.endpoint, 'test'))
+        userdict = json.loads(response.content)
+        expected = sorted(['lat', 'lon', 'callsign', 'timezone', 'gridsquare', 'elevation'])
+        self.assertEqual(expected, sorted(userdict.keys()))
+
     def testMissingLat(self):
         """Verify correct key is returned when missing lat"""
         user = {
@@ -143,6 +151,55 @@ class UserTests(unittest.TestCase):
         self.assertEqual(message.get('error'), "Missing Property")
         self.assertEqual(message.get('property name'), "street_address")
 
+    def testMissingGrid(self):
+        """Verify correct key is returned in error payload when grid is missing"""
+        user = {
+            'callsign': 'test',
+            'lat': 43.612988,
+            'long': -116.206325,
+            'elevation': 555,
+            'street_address': '404 S 8th St. Boise, ID 83702',
+            'timezone': 'America/Denver'
+        }
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        message = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(message.get('error'), "Missing Property")
+        self.assertEqual(message.get('property name'), "grid")
+
+    def testMissingTimezone(self):
+        """Verify correct key is returned in error payload when grid is missing"""
+        user = {
+            'callsign': 'test',
+            'lat': 43.612988,
+            'long': -116.206325,
+            'elevation': 555,
+            'street_address': '404 S 8th St. Boise, ID 83702'
+        }
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        message = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(message.get('error'), "Missing Property")
+        self.assertEqual(message.get('property name'), "timezone")
+
+    def testUpdateLatLon(self):
+        """Change the address on a user, verify lat/lon are updated as expected"""
+        user = {
+            'lat': None,
+            'long': None,
+            'callsign': 'test',
+            'street_address': '700 W. Jefferson St. Boise, ID 83702',
+            'timezone': 'America/Denver',
+            'grid': 'DN13'
+        }
+        updateResponse = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        self.assertEqual(updateResponse.status_code, 204)
+        getResponse = requests.get('{}{}'.format(self.endpoint, user.get('callsign')))
+        newUser = json.loads(getResponse.content)
+        self.assertEqual(newUser.get('lat'), 43.6178216)
+        self.assertEqual(newUser.get('lon'), -116.1995185)
+
+
 
 if __name__ == '__main__':
     with open('output.txt', 'w') as output:
@@ -168,7 +225,7 @@ if __name__ == '__main__':
             print('Cleaning up')
             os.remove(gunoutput.split('/')[1])
         else:
-            print('{} suite(s) failed'.format(failingsuites))
+            print('{} suite(s) failed'.format(', '.join(failingsuites)))
         print('Shutting Down')
         process.terminate()
         process.wait()
