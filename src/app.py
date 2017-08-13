@@ -5,7 +5,7 @@ import TleHandler
 import AvailablePasses
 # import requests
 
-ALLOWED_ORIGINS = ['http://localhost:8080']
+ALLOWED_ORIGINS = ['http://localhost:8080', 'http://localhost:8181']
 ALLOWED_METHODS = ['GET', 'POST', 'DELETE']
 ALLOWED_HEADERS = ['Content-Type']
 

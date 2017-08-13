@@ -72,6 +72,23 @@ class UserTests(unittest.TestCase):
         response = requests.get('{}baduser'.format(self.endpoint, port))
         self.assertEqual(response.status_code, 404)
 
+    def testSendNotJSON(self):
+        """Verify a contentype error is received when payload is not json"""
+        user = {
+            'lat': None,
+            'long': None,
+            'callsign': 'test',
+            'street_address': '404 S 8th st. Boise, Idaho',
+            'timezone': 'America/Denver',
+            'grid': 'DN13'
+        }
+        headers = {'content_type': 'text/plain'}
+        response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), data=user, headers=headers)
+        message = json.loads(response.content)
+        self.assertEqual(response.status_code, 415)
+        self.assertEqual(message.get('title'), 'Unsupported media type')
+        self.assertEqual(message.get('description'), 'Content must be sent as application/json')
+
     def testCreateGoodUser(self):
         user = {
             'lat': None,
@@ -85,8 +102,9 @@ class UserTests(unittest.TestCase):
         self.assertEqual(response.status_code, 204)
 
     def testExpectedKeys(self):
-        """test to ensure GET 'test' user returns expected keys.  Note that street_address is only used to calculate lat/long and not stored or
-            returned"""
+        """test to ensure GET 'test' user returns expected keys.  
+           Note that street_address is only used to calculate lat/long and not stored or
+           returned"""
         response = requests.get('{}{}'.format(self.endpoint, 'test'))
         userdict = json.loads(response.content)
         expected = sorted(['lat', 'lon', 'callsign', 'timezone', 'gridsquare', 'elevation'])
@@ -192,13 +210,12 @@ class UserTests(unittest.TestCase):
             'timezone': 'America/Denver',
             'grid': 'DN13'
         }
-        updateResponse = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
-        self.assertEqual(updateResponse.status_code, 204)
-        getResponse = requests.get('{}{}'.format(self.endpoint, user.get('callsign')))
-        newUser = json.loads(getResponse.content)
-        self.assertEqual(newUser.get('lat'), 43.6178216)
-        self.assertEqual(newUser.get('lon'), -116.1995185)
-
+        update_response = requests.post('{}{}'.format(self.endpoint, user.get('callsign')), json=user)
+        self.assertEqual(update_response.status_code, 204)
+        get_response = requests.get('{}{}'.format(self.endpoint, user.get('callsign')))
+        new_user = json.loads(get_response.content)
+        self.assertEqual(new_user.get('lat'), 43.6178216)
+        self.assertEqual(new_user.get('lon'), -116.1995185)
 
 
 if __name__ == '__main__':
