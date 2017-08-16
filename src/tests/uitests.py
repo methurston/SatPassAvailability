@@ -20,60 +20,60 @@ class UITests(unittest.TestCase):
         reset_btn = self.driver.find_element_by_id('resetUserBtn')
         reset_btn.click()
 
-    # def testPageTitle(self):
-    #     """Verify page title. Simple case to ensure expected page is loaded"""
-    #     self.assertEqual(self.driver.title, 'N7DFL - Sat Pass Availability')
-    #
-    # def testResetButton(self):
-    #     """Verify data entered in callsign field is cleared with reset"""
-    #     id_field = self.driver.find_element_by_id('callsign')
-    #     id_field.send_keys('FOO')
-    #     reset_button = self.driver.find_element_by_id('resetUserBtn')
-    #     reset_button.click()
-    #     id_field = self.driver.find_element_by_id('callsign')
-    #     self.assertEqual(id_field.get_attribute('value'), '')
-    #
-    # def testSeedGoodUser(self):
-    #     """Enter a known good user for further testing"""
-    #     id_field = self.driver.find_element_by_id('callsign')
-    #     id_field.send_keys(self.test_user)
-    #     submit = self.driver.find_element_by_id('getUserBtn')
-    #     submit.click()
-    #     result_div = self.driver.find_element_by_id('usertitle')
-    #     if result_div.text.find('{} not found'.format(self.test_user)) != -1:
-    #         add_btn = self.driver.find_element_by_id('addUserBtn')
-    #         add_btn.click()
-    #     grid_square = self.driver.find_element_by_id('gridsquare').get_attribute('value')
-    #     self.assertEqual(grid_square, 'FN31pr')
-    #
-    # def testFindUser(self):
-    #     """when entering a known good username, verify the expected data is returned to the UI"""
-    #     id_field = self.driver.find_element_by_id('callsign')
-    #     get_user_btn = self.driver.find_element_by_id('getUserBtn')
-    #     id_field.send_keys(self.test_user)
-    #     get_user_btn.click()
-    #     tz_field = self.driver.find_element_by_id('timezone')
-    #     self.assertEqual(tz_field.get_attribute('value'), 'America/New_York')
-    #
-    # def testEnterAvailability(self):
-    #     """Verify submitting a timeslot is successful"""
-    #     id_field = self.driver.find_element_by_id('callsign')
-    #     get_user = self.driver.find_element_by_id('getUserBtn')
-    #     id_field.send_keys(self.test_user)
-    #     get_user.click()
-    #     days = self.driver.find_elements_by_css_selector('div.dayLeft input[type="checkbox"]')
-    #     for day in days:
-    #         day.click()
-    #     time = self.driver.find_element_by_id('start_time')
-    #     duration = self.driver.find_element_by_id('duration')
-    #     time.send_keys('1300PM')
-    #     duration.send_keys('3600')
-    #     duration.send_keys('\t')  # send a tab to fire the blur event
-    #     store_btn = self.driver.find_element_by_id('addSlotBtn')
-    #     self.assertNotEqual(store_btn.get_attribute('disabled'), 'true')
-    #     store_btn.click()
-    #     slot_title = self.driver.find_element_by_id('slottitle')
-    #     self.assertEqual(slot_title.text, 'Timeslot stored')
+    def testPageTitle(self):
+        """Verify page title. Simple case to ensure expected page is loaded"""
+        self.assertEqual(self.driver.title, 'N7DFL - Sat Pass Availability')
+
+    def testResetButton(self):
+        """Verify data entered in callsign field is cleared with reset"""
+        id_field = self.driver.find_element_by_id('callsign')
+        id_field.send_keys('FOO')
+        reset_button = self.driver.find_element_by_id('resetUserBtn')
+        reset_button.click()
+        id_field = self.driver.find_element_by_id('callsign')
+        self.assertEqual(id_field.get_attribute('value'), '')
+
+    def testSeedGoodUser(self):
+        """Enter a known good user for further testing"""
+        id_field = self.driver.find_element_by_id('callsign')
+        id_field.send_keys(self.test_user)
+        submit = self.driver.find_element_by_id('getUserBtn')
+        submit.click()
+        result_div = self.driver.find_element_by_id('usertitle')
+        if result_div.text.find('{} not found'.format(self.test_user)) != -1:
+            add_btn = self.driver.find_element_by_id('addUserBtn')
+            add_btn.click()
+        grid_square = self.driver.find_element_by_id('gridsquare').get_attribute('value')
+        self.assertEqual(grid_square, 'FN31pr')
+
+    def testFindUser(self):
+        """when entering a known good username, verify the expected data is returned to the UI"""
+        id_field = self.driver.find_element_by_id('callsign')
+        get_user_btn = self.driver.find_element_by_id('getUserBtn')
+        id_field.send_keys(self.test_user)
+        get_user_btn.click()
+        tz_field = self.driver.find_element_by_id('timezone')
+        self.assertEqual(tz_field.get_attribute('value'), 'America/New_York')
+
+    def testEnterAvailability(self):
+        """Verify submitting a timeslot is successful"""
+        id_field = self.driver.find_element_by_id('callsign')
+        get_user = self.driver.find_element_by_id('getUserBtn')
+        id_field.send_keys(self.test_user)
+        get_user.click()
+        days = self.driver.find_elements_by_css_selector('div.dayLeft input[type="checkbox"]')
+        for day in days:
+            day.click()
+        time = self.driver.find_element_by_id('start_time')
+        duration = self.driver.find_element_by_id('duration')
+        time.send_keys('1300PM')
+        duration.send_keys('3600')
+        duration.send_keys('\t')  # send a tab to fire the blur event
+        store_btn = self.driver.find_element_by_id('addSlotBtn')
+        self.assertNotEqual(store_btn.get_attribute('disabled'), 'true')
+        store_btn.click()
+        slot_title = self.driver.find_element_by_id('slottitle')
+        self.assertEqual(slot_title.text, 'Timeslot stored')
 
     def testDeleteTimeslot(self):
         """Verify that deleting a timeslot removes it from the UI"""
