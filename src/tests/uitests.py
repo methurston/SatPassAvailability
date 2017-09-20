@@ -88,15 +88,11 @@ class UITests(unittest.TestCase):
         delete_id = cells[0].text
         cells[3].click()
         self.driver.switch_to.alert.accept()
-        new_show_timeslots = self.driver.find_element_by_id('allheader')
-        new_show_timeslots.click()
-        new_show_timeslots.click()  # why twice? Handle focus better
         print('Title: {}'.format(self.driver.title))
         new_timeslot_rows = self.driver.find_elements_by_xpath("//div[@id='storedinfo']/table/tbody/tr")  #find all rows
         print(len(new_timeslot_rows))
         for row in new_timeslot_rows[1:]:
             cells = row.find_elements_by_tag_name('td')
-            print(cells[0].text)
             self.assertNotEqual(cells[0].text, delete_id)
 
 
