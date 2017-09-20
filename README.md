@@ -14,8 +14,7 @@ SatTrack.py puts all of the information together and uses PyEphem to calculate t
 
 
 # Instructions
-It's recommended to set up a Python 2.7 or 3.5 virtualenv for use. As of writing, both versions are supported,
-Version 3.5 will be the primary version supported going forward.
+It's recommended to set up a Python 3.6 virtualenv for use.
 
 1. Clone this repo.
 2. Install the required libraries via pip (pip install --upgrade -r requriements.txt)
@@ -28,7 +27,7 @@ will be generated and an empty schema will be applied.
 4. To run a test version locally, run src/tests/testlauncher.py.  This will launch the API on port 8000 and the UI on port 8181.
 
 
-#TODO:
+# TODO:
 1. Consider implementing Schema control.
 2. Wrap the whole damn thing in flask and make it a rest API. -DONE.  Using falcon for the API framework
 3. Add auth.
